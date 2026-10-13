@@ -1,0 +1,14 @@
+{
+  "bind": "127.0.0.1",
+  "port": 8765,
+  "uds_path": "@wechat_stream_ipc",
+  "db_path": "/data/adb/wx_stream/vault.db",
+  "token": "REPLACE_WITH_SECURE_TOKEN",
+  "auth": true,
+  "allow_chats": [],
+  "block_chats": [],
+  "log_file": "/data/adb/wx_stream/daemon.log",
+  "log_max_bytes": 10485760,
+  "log_keep": 3,
+  "retain_days": 90
+}

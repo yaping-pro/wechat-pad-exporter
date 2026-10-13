@@ -1,0 +1,50 @@
+name: Build Go Daemon
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'daemon/**'
+      - '.github/workflows/build-daemon.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'daemon/**'
+      - '.github/workflows/build-daemon.yml'
+
+jobs:
+  build:
+    name: Cross Compile Daemon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache-dependency-path: daemon/go.sum
+
+      - name: Run Daemon Tests
+        working-directory: daemon
+        run: |
+          go test -v ./...
+
+      - name: Build Android ARM64 Binary
+        working-directory: daemon
+        run: |
+          mkdir -p ../dist
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -ldflags="-s -w" -o ../dist/wx_daemon-android-arm64 .
+
+      - name: Build Linux AMD64 Binary
+        working-directory: daemon
+        run: |
+          mkdir -p ../dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ../dist/wx_daemon-linux-amd64 .
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wx_daemon-binaries
+          path: dist/*

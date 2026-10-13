@@ -1,0 +1,4 @@
+# 仅依赖 Python 3 标准库，无第三方依赖
+# 实际 import: os, sys, time, json, ipaddress, datetime, urllib.request, urllib.error
+# 内置瞬时网络故障重试机制（默认重试 3 次，间隔 2s/5s/10s，总预算 60s）
+# 需要 Python 3.8+（使用 ipaddress 模块与 datetime.fromisoformat）

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WxExportState",
+  "type": "object",
+  "required": [
+    "last_watermark",
+    "last_sha256",
+    "last_success",
+    "last_endpoint",
+    "last_messages"
+  ],
+  "properties": {
+    "last_watermark": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "最新消费到的导出数据水位线时间戳 (ISO 8601)"
+    },
+    "last_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "上次导出 payload manifest.sha256 校验和"
+    },
+    "last_success": {
+      "type": "string",
+      "format": "date-time",
+      "description": "上次消费成功的 UTC 时间戳 (ISO 8601)"
+    },
+    "last_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "成功消费的数据源端点 URL"
+    },
+    "last_messages": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "上次消费的总消息数"
+    }
+  },
+  "additionalProperties": false
+}

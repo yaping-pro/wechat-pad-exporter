@@ -1,0 +1,56 @@
+# Android / Gradle build outputs
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+build/
+.gradle/
+android-module/.gradle/
+android-module/build/
+android-module/app/build/
+local.properties
+
+# Go build outputs
+daemon/wx_daemon
+daemon/build/
+*.exe
+*.test
+
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Secret tokens, private keys and runtime vaults
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*ts_auth_key*
+auth_key*
+*device_token*
+*export_token*
+*.token
+vault.db*
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs & dumps
+*.log
+*.xlog
+*_dump.json
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
