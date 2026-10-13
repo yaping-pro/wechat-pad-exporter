@@ -2,7 +2,7 @@
 
 ## 1. 核心安全铁律 (Loopback & Token Security)
 
-为了防止个人即时通讯数据在网络中意外泄露，`wechat-pad-exporter` 恪守严格的安全设计：
+为了防止个人即时通讯数据在网络中意外泄露，`wx-pad-exporter` 恪守严格的安全设计：
 - `wx_daemon` **默认且推荐**仅监听 Android 设备的本地回环地址 `127.0.0.1:8765`。
 - 严禁在未经加密隔离的公共局域网中配置 `bind: "0.0.0.0"`。
 - 所有 API 请求均受 Bearer 令牌保护。

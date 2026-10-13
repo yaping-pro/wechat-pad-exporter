@@ -1,10 +1,10 @@
-# WeChat Pad Exporter (`wechat-pad-exporter`)
+# WeChat Pad Exporter (`wx-pad-exporter`)
 
 > **Pad 版微信实时聊天流只读导出守护进程 + 通用 Webhook / 个人 AI 助理数据管道**  
 > Read-only realtime chat stream exporter daemon for Tablet-mode WeChat, paired with universal Webhook and personal AI assistant consumer pipelines.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/yaping-pro/wechat-pad-exporter?color=brightgreen)](https://github.com/yaping-pro/wechat-pad-exporter/releases/latest)
+[![Release](https://img.shields.io/github/v/release/yaping-pro/wx-pad-exporter?color=brightgreen)](https://github.com/yaping-pro/wx-pad-exporter/releases/latest)
 [![Go Report Card](https://img.shields.io/badge/Go-1.23-00ADD8.svg?logo=go)](daemon/)
 [![Android Hook](https://img.shields.io/badge/Hook-DexKit%20%2B%20LSPosed-green.svg)](android-module/)
 
@@ -38,14 +38,14 @@
 Agent 执行简明指令：
 ```bash
 # 直接向你的 AI Agent 提供本仓库与目标设备
-"请阅读 AGENT.md，在当前连接的 Android 设备上自主完成 wechat-pad-exporter 的完整部署、配置与健康检查。"
+"请阅读 AGENT.md，在当前连接的 Android 设备上自主完成 wx-pad-exporter 的完整部署、配置与健康检查。"
 ```
 
 ---
 
 ### 💡 项目定位与核心特性
 
-`wechat-pad-exporter` 是一个专为**个人数据自主权**与**本地个人 AI 助理**打造的高性能、工业级数据导出套件：
+`wx-pad-exporter` 是一个专为**个人数据自主权**与**本地个人 AI 助理**打造的高性能、工业级数据导出套件：
 1. **只读 Xposed 探针 (`com.wx.sniffer`)**：运行于 Android 微信进程内部，借助 DexKit 动态匹配 Dalvik 字节码指令特征，无感拦截底层 WCDB SQLite 插入事件，并通过 Linux 抽象命名空间域套接字（`@wechat_stream_ipc`）极速单向投递。
 2. **本地 Go 守护进程 (`wx_daemon`)**：轻量级单二进制，默认安全绑定于回环地址 `127.0.0.1:8765`。内置 Bearer Token 强鉴权、SQLite WAL 增量存储、日志自动轮转与 SHA-256 防篡改导出摘要。
 3. **自愈看门狗守护 (`deploy/`)**：工业级常驻脚本（`service.sh` / `wx_autostart.sh`），支持 Magisk / KernelSU 开机自动拉起、OOM 保护与防多实例踩踏。
@@ -68,7 +68,7 @@ Agent 执行简明指令：
 > **极速路径**：直接使用预编译 Release 产物，省去配置 Android NDK 与 Go 交叉编译环境。
 
 #### 步骤 1：下载预编译发布产物
-前往 [GitHub Releases 最新发布页](https://github.com/yaping-pro/wechat-pad-exporter/releases/latest) 下载：
+前往 [GitHub Releases 最新发布页](https://github.com/yaping-pro/wx-pad-exporter/releases/latest) 下载：
 - `wechat-pad-exporter-module-v1.0.1.apk` (Xposed 探针模块)
 - `wx_daemon-android-arm64` (Android 设备端守护进程二进制)
 
@@ -282,7 +282,7 @@ echo "微信真实 UID: $DETECTED_UID"
 
 <!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
 
-> ⚠️ **群二维码时效提示**：微信群二维码具有 7 天有效期限（当前二维码有效期至 **2026-10-20**）。本仓库会定期维护轮换此二维码图片；若您扫码时提示已过期，请查阅仓库最新提交的 [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) 或在 [Issues](https://github.com/yaping-pro/wechat-pad-exporter/issues) 中留言反馈。
+> ⚠️ **群二维码时效提示**：微信群二维码具有 7 天有效期限（当前二维码有效期至 **2026-10-20**）。本仓库会定期维护轮换此二维码图片；若您扫码时提示已过期，请查阅仓库最新提交的 [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) 或在 [Issues](https://github.com/yaping-pro/wx-pad-exporter/issues) 中留言反馈。
 
 ---
 
@@ -318,7 +318,7 @@ Prompt your agent:
 
 ### 💡 Overview & Core Capabilities
 
-`wechat-pad-exporter` is an industrial-grade, open-source pipeline engineered for **personal data sovereignty** and **local AI personal assistants**:
+`wx-pad-exporter` is an industrial-grade, open-source pipeline engineered for **personal data sovereignty** and **local AI personal assistants**:
 1. **Read-Only Xposed Probe (`com.wx.sniffer`)**: Injected into the Android WeChat process, dynamically matching Dalvik bytecode opcode signatures via DexKit to intercept low-level WCDB SQLite insertions, emitting data through an abstract Linux Unix Domain Socket (`@wechat_stream_ipc`).
 2. **Local Go Daemon (`wx_daemon`)**: Lightweight self-contained binary safely bound to loopback `127.0.0.1:8765` by default. Features Bearer token authentication, WAL-backed SQLite incremental persistence, automatic log rotation, and SHA-256 tamper-evident export manifests.
 3. **Self-Healing Watchdog (`deploy/`)**: Production-ready watchdog scripts (`service.sh` / `wx_autostart.sh`) ensuring daemon uptime across reboots on Magisk / KernelSU, OOM priority protection, and multi-instance concurrency isolation.
@@ -341,7 +341,7 @@ Prompt your agent:
 > **Fast Track**: Skip local Android NDK and Go cross-compilation setups by using precompiled Release binaries.
 
 #### Step 1: Download Release Artifacts
-Visit the [GitHub Releases Latest Page](https://github.com/yaping-pro/wechat-pad-exporter/releases/latest) and download:
+Visit the [GitHub Releases Latest Page](https://github.com/yaping-pro/wx-pad-exporter/releases/latest) and download:
 - `wechat-pad-exporter-module-v1.0.1.apk` (Xposed probe module)
 - `wx_daemon-android-arm64` (Android device daemon binary)
 
@@ -549,4 +549,4 @@ Distributed under the [MIT License](LICENSE).
 
 <!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
 
-> ⚠️ **QR Expiration Notice**: WeChat group invitation QR codes have limited validity (currently **valid until 2026-10-20**). The repository maintainers refresh this asset regularly. If the QR code has expired when you scan it, check the latest committed [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) on `main` or open an [Issue](https://github.com/yaping-pro/wechat-pad-exporter/issues).
+> ⚠️ **QR Expiration Notice**: WeChat group invitation QR codes have limited validity (currently **valid until 2026-10-20**). The repository maintainers refresh this asset regularly. If the QR code has expired when you scan it, check the latest committed [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) on `main` or open an [Issue](https://github.com/yaping-pro/wx-pad-exporter/issues).

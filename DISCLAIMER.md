@@ -2,7 +2,7 @@
 
 ## 1. 个人数据便携权与研究性质 (Personal Data Portability)
 
-本项目（`wechat-pad-exporter`）致力于践行**个人数据自主权与数据可移植性原则（Personal Data Portability）**。本项目提供技术工具，旨在方便用户依法依规备份并分析其个人拥有的即时通信数据，服务于本地个人知识库与自建 AI 助理。
+本项目（`wx-pad-exporter`）致力于践行**个人数据自主权与数据可移植性原则（Personal Data Portability）**。本项目提供技术工具，旨在方便用户依法依规备份并分析其个人拥有的即时通信数据，服务于本地个人知识库与自建 AI 助理。
 
 ## 2. 严格只读原则承诺 (Strict Read-Only Guarantee)
 
