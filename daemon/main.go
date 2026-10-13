@@ -17,6 +17,8 @@ import (
 	"syscall"
 	"time"
 )
+// Version is injected at build time via -ldflags "-X main.Version=${TAG}".
+var Version = "dev"
 
 // ResolveDefaultDbPath determines the default DB path adhering to XDG conventions.
 func ResolveDefaultDbPath() string {
@@ -57,6 +59,7 @@ func main() {
 		logMaxBytes    = flag.Int64("log-max-bytes", -1, "Max log file bytes before rotation")
 		logKeep     = flag.Int("log-keep", -1, "Number of rotated log backups to retain")
 		logFile     = flag.String("log-file", "", "Log file path for rotation (empty = write to stderr only)")
+		allowUID    = flag.String("allow-uid", "", "Comma-separated list of allowed peer UIDs for UDS (default: config or root 0)")
 	)
 	flag.Parse()
 
@@ -111,7 +114,13 @@ func main() {
 	if *logFile != "" {
 		cfg.LogFile = *logFile
 	}
-
+	if *allowUID != "" {
+		uids, err := ParseUIDList(*allowUID)
+		if err != nil {
+			log.Fatalf("[WX-Daemon] Invalid -allow-uid flag: %v", err)
+		}
+		cfg.AllowedPeerUIDs = uids
+	}
 	// 3. Resolve log rotation writer
 	if cfg.LogFile != "" {
 		rotWriter, err := NewRotatingLogWriter(cfg.LogFile, cfg.LogMaxBytes, cfg.LogKeep)
@@ -205,6 +214,7 @@ func main() {
 	}()
 
 	// Accept connections loop
+	// Accept connections loop with peer UID verification
 	go func() {
 		for {
 			conn, err := udsListener.Accept()
@@ -213,6 +223,19 @@ func main() {
 					break
 				}
 				log.Printf("[WX-Daemon] UDS Accept error: %v", err)
+				continue
+			}
+
+			// Verify peer UID via SO_PEERCRED
+			peerUID, allowed, err := CheckPeerUID(conn, cfg.AllowedPeerUIDs)
+			if err != nil {
+				log.Printf("[WX-Daemon] UDS peer UID check failed: %v, dropping connection", err)
+				_ = conn.Close()
+				continue
+			}
+			if !allowed {
+				log.Printf("[WX-Daemon] SECURITY: rejected unauthorized peer UID %d (allowed: %v)", peerUID, cfg.AllowedPeerUIDs)
+				_ = conn.Close()
 				continue
 			}
 
@@ -240,18 +263,18 @@ func main() {
 // listenUDS handles both Linux Abstract Unix Domain Socket (@name) and filesystem-based socket paths.
 func listenUDS(addr string) (net.Listener, error) {
 	if runtime.GOOS == "linux" || runtime.GOOS == "android" {
-		// On Linux and Android, @prefix indicates abstract namespace socket
-		return net.Listen("unix", addr)
+		// On Linux/Android, if addr is abstract (@name), bind it directly.
+		// If filesystem path, protect directory 0700 and socket 0600.
+		return ListenUDSProtected(addr)
 	}
 
 	// On non-Linux (macOS/Darwin fallback for local testing):
-	// Abstract sockets are not supported; convert to a temporary file socket
+	// Abstract sockets are not supported; convert to a temporary filesystem socket
 	fileSock := addr
 	if strings.HasPrefix(addr, "@") {
 		fileSock = filepath.Join(os.TempDir(), strings.TrimPrefix(addr, "@")+".sock")
 	}
-	_ = os.Remove(fileSock)
-	return net.Listen("unix", fileSock)
+	return ListenUDSProtected(fileSock)
 }
 
 // handleUdsConnection processes streaming JSON lines from the Android hook client.
@@ -274,7 +297,8 @@ func handleUdsConnection(conn net.Conn, state *ServerState, out chan<- *RawHookM
 
 		var rawMsg RawHookMessage
 		if err := json.Unmarshal(line, &rawMsg); err != nil {
-			log.Printf("[WX-Daemon] JSON Unmarshal error: %v (raw: %s)", err, string(line))
+			msgLen, shaPrefix := SafeLineSummary(line)
+			log.Printf("[WX-Daemon] JSON Unmarshal error: %v (len: %d, sha256_prefix: %s)", err, msgLen, shaPrefix)
 			continue
 		}
 

@@ -5,11 +5,18 @@
 
 ---
 
-## [Unreleased]
-### Added
-- 基础开源协作治理规范：Issue Templates (Bug Report / Feature Request / Config)、PR Template、CODEOWNERS、Dependabot 自动依赖更新及分支保护策略。
-
----
+## [v1.0.4] - 2026-10-13
+### Security & Correctness
+- **S-001 (P1, security)**: 抽象 UDS / 文件系统 UDS 连接引入底层 peer UID 校验机制 (`SO_PEERCRED` / `LOCAL_PEERCRED`)。仅允许白名单 UID (root 0 或微信 UID) 接入，拒绝未授权本地对端注入；支持 `-allow-uid` 与 `allowed_peer_uids` 配置。
+- **S-004 (P1, privacy)**: 修复 JSON 解析失败日志泄漏私聊明文问题，仅打印错误类型、字节长度与 SHA-256 前缀哈希。
+- **O-003 (P1, performance)**: SQLite 查询下推安全上限门禁 (`LIMIT limit*K + 1`)，杜绝大时间窗口 OOM，并在命中上限时返回 `truncated: true`。
+- **S-003 (P1, hardening)**: 移除 `setup_phone.sh` 对 `/data/local/tmp` 的 `chmod 777` 操作，维持 Android 默认权限 `0771` 并创建专用 `0700` 工作区；全局休眠与进程杀手修改收归显式 `--enable-global-tuning` 门禁，并新增 `deploy/teardown_phone.sh` 原生回滚脚本。
+- **P0-a (P0, reliability)**: 修复 `wx_watchdog.sh` 与 `wx_autostart.sh` 在健康探测中未携带 Bearer 令牌导致探活死循环并频繁报 401 的问题。
+- **P0-b (P0, robustness)**: 修复 `deploy/service.sh` 在缺少 `config.json` 时裸启导致守护进程 fail-closed 崩溃退出，添加前置友好校验与报错引导。
+- **R-001 & R-004 (P1, release truth)**: 发布 CI 中增加证书公钥指纹 (`76:AD:A6:29:...`) 强比对与 `zipalign -c 4` 门禁；在 `SECURITY.md` 正式公示官方签名指纹。
+- **R-003 & R-005 (P1, build consistency)**: Go 守护进程版本通过 `-ldflags -X main.Version=${TAG}` 动态注入；tag 触发构建流与 Release 发布收敛为单一构建链，杜绝二次构建漂移。
+- **CI / Fork PR**: 为 fork PRs 提供瞬时 debug keystore 自动降级构建，保证开源贡献者 PR 绿灯。
+- **P2 (DevOps)**: 将 `scripts/selfcheck.sh` 改造为环境无关的自适应脚本，未配置外部主机时优雅跳过。
 
 ## [v1.0.2] - 2026-10-13
 ### Added

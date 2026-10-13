@@ -235,7 +235,14 @@ func (s *Store) SaveMessage(msg *NormalizedMessage) error {
 }
 
 // QueryMessagesByRange fetches messages between since and to timestamps (inclusive).
+// Deprecated: Use QueryMessagesByRangeWithLimit to avoid memory bloat on large windows.
 func (s *Store) QueryMessagesByRange(since, to int64) ([]NormalizedMessage, error) {
+	return s.QueryMessagesByRangeWithLimit(since, to, 0)
+}
+
+// QueryMessagesByRangeWithLimit fetches messages between since and to timestamps with a SQL safety cap.
+// If rowLimit <= 0, no LIMIT clause is applied.
+func (s *Store) QueryMessagesByRangeWithLimit(since, to int64, rowLimit int) ([]NormalizedMessage, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -245,7 +252,14 @@ func (s *Store) QueryMessagesByRange(since, to int64) ([]NormalizedMessage, erro
 	WHERE ts >= ? AND ts <= ?
 	ORDER BY ts ASC, id ASC
 	`
-	rows, err := s.db.Query(query, since, to)
+	var rows *sql.Rows
+	var err error
+	if rowLimit > 0 {
+		query += " LIMIT ?"
+		rows, err = s.db.Query(query, since, to, rowLimit)
+	} else {
+		rows, err = s.db.Query(query, since, to)
+	}
 	if err != nil {
 		return nil, err
 	}

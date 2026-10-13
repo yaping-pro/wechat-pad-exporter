@@ -183,6 +183,7 @@ type ExportRange struct {
 type ExportManifest struct {
 	Sha256       string `json:"sha256"`
 	MessageCount int    `json:"message_count"`
+	Truncated    bool   `json:"truncated,omitempty"`
 }
 
 // ExportResponse represents the complete export payload contract.
@@ -238,7 +239,7 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			TotalMessages: totalMsgs,
 			TotalReceived: state.TotalReceived.Load(),
 			MemoryBytes:   memStats.Alloc,
-			Version:       "1.0.0-pad",
+			Version:       Version,
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -301,8 +302,24 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 				return
 			}
 		}
-		// Query SQLite messages within range
-		msgs, err := state.Store.QueryMessagesByRange(since, to)
+
+		// Trade-off: Chat allow/block filtering happens in Go memory, so a naive SQL "LIMIT limit"
+		// could starve allowed messages if preceding rows belong to filtered-out chats.
+		// Conversely, querying unbounded rows across huge time windows causes memory bloat and OOM.
+		// We enforce a SQL safety cap: fetch up to limit*K + 1 rows (K=10, min cap 2000, max cap 20000).
+		// If SQL returns more rows than can be served after Go filtering, or if the safety cap is hit,
+		// we mark truncated: true so clients know the query window contains more data.
+		kMultiplier := 10
+		sqlCap := limit * kMultiplier
+		if sqlCap < 2000 {
+			sqlCap = 2000
+		}
+		if sqlCap > 20000 {
+			sqlCap = 20000
+		}
+		// Fetch sqlCap + 1 to detect whether the safety ceiling was hit
+		fetchLimit := sqlCap + 1
+		msgs, err := state.Store.QueryMessagesByRangeWithLimit(since, to, fetchLimit)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -310,12 +327,17 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			return
 		}
 
+		hitSqlCap := len(msgs) > sqlCap
+		if hitSqlCap {
+			msgs = msgs[:sqlCap]
+		}
+
 		// Group messages by chat_id
 		chatOrder := make([]string, 0)
 		chatMap := make(map[string]*ExportChatItem)
 		var maxTs int64 = 0
-
 		filteredTotalCount := 0
+		hitLimit := false
 		for _, msg := range msgs {
 			// Apply chat filtering
 			if !state.IsChatAllowed(msg.ChatId, msg.DisplayName) {
@@ -323,6 +345,7 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			}
 
 			if filteredTotalCount >= limit {
+				hitLimit = true
 				break
 			}
 
@@ -399,9 +422,9 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			Manifest: ExportManifest{
 				Sha256:       manifestHash,
 				MessageCount: filteredTotalCount,
+				Truncated:    hitLimit || hitSqlCap,
 			},
 		}
-
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	})

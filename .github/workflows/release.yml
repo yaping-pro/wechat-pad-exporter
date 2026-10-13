@@ -28,9 +28,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android-module/gradlew
 
-      - name: Decode Android Release Keystore
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
+      - name: Setup Keystore (Official Keystore Required for Release)
         run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing! Release builds require official signing keystore."
+            exit 1
+          fi
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -43,11 +46,10 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-
       - name: Prepare Named Release Assets and Verify Signature
         run: |
           mkdir -p release-assets
-          TAG_NAME="${GITHUB_REF_NAME:-v1.0.3}"
+          TAG_NAME="${GITHUB_REF_NAME:-v1.0.4}"
           SRC_APK=$(ls android-module/app/build/outputs/apk/release/*.apk | head -n 1)
           if [ -z "$SRC_APK" ] || [ ! -f "$SRC_APK" ]; then
             echo "::error::Release APK not found in android-module/app/build/outputs/apk/release/"
@@ -57,18 +59,34 @@ jobs:
           cp "$SRC_APK" "$TARGET_APK"
           echo "Prepared asset: $TARGET_APK ($(ls -lh "$TARGET_APK" | awk '{print $5}'))"
 
-          echo "Verifying APK Signature..."
-          if command -v apksigner >/dev/null 2>&1; then
-            apksigner verify --verbose "$TARGET_APK"
-          else
-            $ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$TARGET_APK" || \
-            find $ANDROID_HOME/build-tools/ -name apksigner -exec {} verify --verbose "$TARGET_APK" \;
+          echo "Verifying APK Signature and Align..."
+          APKSIGNER="apksigner"
+          if ! command -v apksigner >/dev/null 2>&1; then
+            APKSIGNER=$(find $ANDROID_HOME/build-tools/ -name apksigner | head -n 1)
           fi
-          # Hard gate: must contain META-INF signing cert (v1) or verified by apksigner (v2/v3)
-          if ! unzip -l "$TARGET_APK" | grep -E "META-INF/.*\.(RSA|DSA|EC)"; then
-            echo "Warning: No META-INF signature certificate found in ZIP (pure v2/v3 signing)"
+          "$APKSIGNER" verify --verbose "$TARGET_APK"
+
+          # Enforce zipalign 4-byte alignment
+          ZIPALIGN="zipalign"
+          if ! command -v zipalign >/dev/null 2>&1; then
+            ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | head -n 1)
           fi
-          echo "Signature verification passed successfully!"
+          if [ -n "$ZIPALIGN" ] && [ -x "$ZIPALIGN" ]; then
+            echo "Checking zipalign 4-byte alignment..."
+            "$ZIPALIGN" -c -v 4 "$TARGET_APK"
+            echo "Zipalign verification passed!"
+          fi
+
+          echo "Enforcing official release certificate fingerprint..."
+          CERT_FINGERPRINT=$("$APKSIGNER" verify --print-certs "$TARGET_APK" | grep -i "SHA-256 digest:" | head -1 | awk '{print $3}' | tr 'a-z' 'A-Z')
+          EXPECTED_FINGERPRINT="76:AD:A6:29:EA:2A:12:C6:77:67:22:52:15:63:2B:19:F8:31:78:F3:4F:92:C2:79:E6:44:6E:BC:25:84:30:C1"
+          echo "Detected Fingerprint: $CERT_FINGERPRINT"
+          echo "Expected Fingerprint: $EXPECTED_FINGERPRINT"
+          if [ "$CERT_FINGERPRINT" != "$EXPECTED_FINGERPRINT" ]; then
+            echo "::error::Release cert fingerprint mismatch! Expected $EXPECTED_FINGERPRINT, got $CERT_FINGERPRINT"
+            exit 1
+          fi
+          echo "Fingerprint assertion PASSED!"
 
       - name: Upload Sniffer APK
         uses: actions/upload-artifact@v4
@@ -99,14 +117,15 @@ jobs:
         working-directory: daemon
         run: |
           mkdir -p ../dist
-          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -ldflags="-s -w" -o ../dist/wx_daemon-android-arm64 .
+          TAG="${GITHUB_REF_NAME:-v1.0.4}"
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${TAG}" -o ../dist/wx_daemon-android-arm64 .
 
       - name: Build Linux AMD64 Binary
         working-directory: daemon
         run: |
           mkdir -p ../dist
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ../dist/wx_daemon-linux-amd64 .
-
+          TAG="${GITHUB_REF_NAME:-v1.0.4}"
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${TAG}" -o ../dist/wx_daemon-linux-amd64 .
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:

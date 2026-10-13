@@ -20,7 +20,8 @@ type DaemonConfig struct {
 	LogFile      string   `json:"log_file,omitempty"`
 	LogMaxBytes  int64    `json:"log_max_bytes,omitempty"`
 	LogKeep      int      `json:"log_keep,omitempty"`
-	RetainDays   int      `json:"retain_days,omitempty"`
+	RetainDays       int      `json:"retain_days,omitempty"`
+	AllowedPeerUIDs  []uint32 `json:"allowed_peer_uids,omitempty"`
 }
 
 // DefaultConfig returns baseline configuration values.
@@ -38,7 +39,8 @@ func DefaultConfig() DaemonConfig {
 		LogFile:     "",
 		LogMaxBytes: 10 * 1024 * 1024, // 10MB
 		LogKeep:     3,
-		RetainDays:  90,
+		RetainDays:      90,
+		AllowedPeerUIDs: []uint32{0}, // Default: root (UID 0) allowed
 	}
 }
 

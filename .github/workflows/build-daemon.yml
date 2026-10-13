@@ -3,7 +3,6 @@ name: Build Go Daemon
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
     paths:
       - 'daemon/**'
       - '.github/workflows/build-daemon.yml'

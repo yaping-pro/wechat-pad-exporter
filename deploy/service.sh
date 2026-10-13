@@ -41,10 +41,14 @@ start_daemon() {
     mkdir -p "$DB_DIR"
     chmod 700 "$DB_DIR"
 
-    DAEMON_ARGS="-http=$HTTP_ADDR -db=$DB_PATH -uds=$UDS_ADDR"
-    if [ -f "$CONFIG_FILE" ]; then
-        DAEMON_ARGS="$DAEMON_ARGS -config=$CONFIG_FILE"
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "[service.sh] ERROR: Configuration file not found at $CONFIG_FILE"
+        echo "[service.sh] The daemon fails closed by default to prevent unauthorized access."
+        echo "[service.sh] Please create $CONFIG_FILE with a valid 'token' (e.g. from daemon/config.example.json) before starting."
+        return 1
     fi
+
+    DAEMON_ARGS="-http=$HTTP_ADDR -db=$DB_PATH -uds=$UDS_ADDR -config=$CONFIG_FILE"
 
     echo "[service.sh] Starting wx_daemon on $HTTP_ADDR (UDS: $UDS_ADDR)..."
     nohup "$DAEMON_BIN" $DAEMON_ARGS >> "$LOG_FILE" 2>&1 &

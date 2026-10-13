@@ -100,7 +100,14 @@ fi
 # 等待 daemon HTTP 端口可用 (最多 10s)
 for i in $(seq 1 10); do
     if command -v curl >/dev/null 2>&1; then
-        HEALTH=$(curl -s --max-time 1 http://127.0.0.1:8765/health 2>/dev/null)
+        AUTH_HEADER=""
+        if [ -f /data/adb/wx_stream/config.json ]; then
+            TOK=$(grep -o '"token"[^,}]*' /data/adb/wx_stream/config.json 2>/dev/null | head -1 | awk -F: '{print $2}' | tr -d ' "\r\n')
+            if [ -n "$TOK" ]; then
+                AUTH_HEADER="-H Authorization: Bearer $TOK"
+            fi
+        fi
+        HEALTH=$(curl -s $AUTH_HEADER --max-time 1 http://127.0.0.1:8765/health 2>/dev/null)
         if echo "$HEALTH" | grep -q '"status":"ok"'; then
             log "wx_daemon HTTP endpoint is ready"
             break

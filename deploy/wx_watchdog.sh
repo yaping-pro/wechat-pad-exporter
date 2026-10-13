@@ -73,9 +73,15 @@ while true; do
         # G. UDS 数据流连通性健康探测 (纯只读探测与限流日志，绝不 force-stop 微信)
         if command -v curl >/dev/null 2>&1; then
             if [ "$PROC_AGE_S" -ge "$COOLDOWN_SECONDS" ]; then
-                HEALTH=$(curl -s --max-time 3 http://127.0.0.1:8765/health 2>/dev/null)
+                AUTH_HEADER=""
+                if [ -f /data/adb/wx_stream/config.json ]; then
+                    TOK=$(grep -o '"token"[^,}]*' /data/adb/wx_stream/config.json 2>/dev/null | head -1 | awk -F: '{print $2}' | tr -d ' "\r\n')
+                    if [ -n "$TOK" ]; then
+                        AUTH_HEADER="-H Authorization: Bearer $TOK"
+                    fi
+                fi
+                HEALTH=$(curl -s $AUTH_HEADER --max-time 3 http://127.0.0.1:8765/health 2>/dev/null)
                 if echo "$HEALTH" | grep -q '"uds_connected":false'; then
-                    UDS_WARN_THROTTLE=$((UDS_WARN_THROTTLE + 1))
                     # 仅在初次发现或每 10 次检测 (5分钟) 记一条告警，绝不杀微信
                     if [ "$UDS_WARN_THROTTLE" -eq 1 ] || [ $((UDS_WARN_THROTTLE % 10)) -eq 0 ]; then
                         log_wd "UDS health WARNING: uds_connected=false (age=${PROC_AGE_S}s). WeChat left running undisturbed."
