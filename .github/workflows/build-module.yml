@@ -13,6 +13,7 @@ on:
       - 'android-module/**'
       - '.github/workflows/build-module.yml'
   workflow_dispatch:
+
 jobs:
   build:
     name: Build Sniffer APK
@@ -37,8 +38,22 @@ jobs:
         working-directory: android-module
         run: ./gradlew assembleRelease --stacktrace
 
+      - name: Prepare Named Release Assets
+        run: |
+          mkdir -p release-assets
+          TAG_NAME="${GITHUB_REF_NAME:-v1.0.1}"
+          SRC_APK=$(ls android-module/app/build/outputs/apk/release/*.apk | head -n 1)
+          if [ -z "$SRC_APK" ] || [ ! -f "$SRC_APK" ]; then
+            echo "::error::Release APK not found in android-module/app/build/outputs/apk/release/"
+            exit 1
+          fi
+          TARGET_APK="release-assets/wechat-pad-exporter-module-${TAG_NAME}.apk"
+          cp "$SRC_APK" "$TARGET_APK"
+          echo "Prepared asset: $TARGET_APK ($(ls -lh "$TARGET_APK" | awk '{print $5}'))"
+
       - name: Upload Sniffer APK
         uses: actions/upload-artifact@v4
         with:
           name: com.wx.sniffer-release
-          path: android-module/app/build/outputs/apk/release/*.apk
+          path: release-assets/*.apk
+          if-no-files-found: error

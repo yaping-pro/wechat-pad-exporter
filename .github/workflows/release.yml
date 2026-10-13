@@ -1,0 +1,176 @@
+name: Release Artifacts
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build Sniffer APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android-module/gradlew
+
+      - name: Build Release APK
+        working-directory: android-module
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Prepare Named Release Assets
+        run: |
+          mkdir -p release-assets
+          TAG_NAME="${GITHUB_REF_NAME:-v1.0.1}"
+          SRC_APK=$(ls android-module/app/build/outputs/apk/release/*.apk | head -n 1)
+          if [ -z "$SRC_APK" ] || [ ! -f "$SRC_APK" ]; then
+            echo "::error::Release APK not found in android-module/app/build/outputs/apk/release/"
+            exit 1
+          fi
+          TARGET_APK="release-assets/wechat-pad-exporter-module-${TAG_NAME}.apk"
+          cp "$SRC_APK" "$TARGET_APK"
+          echo "Prepared asset: $TARGET_APK ($(ls -lh "$TARGET_APK" | awk '{print $5}'))"
+
+      - name: Upload Sniffer APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: com.wx.sniffer-release
+          path: release-assets/*.apk
+          if-no-files-found: error
+
+  build-daemon:
+    name: Cross Compile Daemon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache-dependency-path: daemon/go.sum
+
+      - name: Run Daemon Tests
+        working-directory: daemon
+        run: |
+          go test -v ./...
+
+      - name: Build Android ARM64 Binary
+        working-directory: daemon
+        run: |
+          mkdir -p ../dist
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -ldflags="-s -w" -o ../dist/wx_daemon-android-arm64 .
+
+      - name: Build Linux AMD64 Binary
+        working-directory: daemon
+        run: |
+          mkdir -p ../dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ../dist/wx_daemon-linux-amd64 .
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wx_daemon-binaries
+          path: dist/*
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [build-apk, build-daemon]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Sniffer APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: com.wx.sniffer-release
+          path: release-dist
+
+      - name: Download Daemon Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wx_daemon-binaries
+          path: release-dist
+
+      - name: Inspect and Verify Release Assets
+        run: |
+          echo "=== Release Assets to Publish ==="
+          ls -la release-dist
+          if [ ! -f release-dist/wx_daemon-android-arm64 ]; then
+            echo "::error::Missing wx_daemon-android-arm64"
+            exit 1
+          fi
+          if [ ! -f release-dist/wx_daemon-linux-amd64 ]; then
+            echo "::error::Missing wx_daemon-linux-amd64"
+            exit 1
+          fi
+          APK_COUNT=$(ls release-dist/*.apk 2>/dev/null | wc -l)
+          if [ "$APK_COUNT" -lt 1 ]; then
+            echo "::error::No APK found in release-dist"
+            exit 1
+          fi
+
+      - name: Create Release and Attach Artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: release-dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+          body: |
+            ## wechat-pad-exporter ${{ github.ref_name }}
+
+            微信数据流导出工具套件，包含 Xposed Hook 模块 (com.wx.sniffer) 与 Go 高性能服务端 Daemon。
+
+            ### 📦 包含构建产物 (Release Assets)
+            - `wechat-pad-exporter-module-${{ github.ref_name }}.apk`: Xposed/LSPosed 数据嗅探模块
+            - `wx_daemon-android-arm64`: Android 手机端本地运行的 Daemon 二进制
+            - `wx_daemon-linux-amd64`: Linux x86_64 服务器端运行的 Daemon 二进制
+
+            ---
+
+            ### 🚀 快速上手与安装说明 (Quick Install Guide)
+
+            #### 1. 安装 Xposed 嗅探模块
+            ```bash
+            adb install wechat-pad-exporter-module-${{ github.ref_name }}.apk
+            ```
+            - 在 LSPosed 管理器中激活模块，勾选作用域为 **微信 (com.tencent.mm)**。
+            - 强制停止微信并重启。
+
+            #### 2. 部署并启动 Daemon (手机端运行示例)
+            生成鉴权 Token 并推送到手机：
+            ```bash
+            # 生成 32 字节高强度随机 Token
+            TOKEN=$(openssl rand -hex 32)
+            echo "Your daemon token: $TOKEN"
+
+            # 推送 daemon 至手机并赋予执行权限
+            adb push wx_daemon-android-arm64 /data/local/tmp/wx_daemon
+            adb shell chmod 755 /data/local/tmp/wx_daemon
+
+            # 启动 daemon (可后台运行)
+            adb shell "AUTH_TOKEN=$TOKEN /data/local/tmp/wx_daemon -listen 127.0.0.1:19090 >/data/local/tmp/daemon.log 2>&1 &"
+            ```
+
+            #### 3. 部署并启动 Daemon (Linux 服务器端示例)
+            ```bash
+            chmod +x wx_daemon-linux-amd64
+            AUTH_TOKEN=$(openssl rand -hex 32) ./wx_daemon-linux-amd64 -listen 0.0.0.0:19090
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
