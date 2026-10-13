@@ -22,6 +22,7 @@
 - [🛠️ 从源码构建](#️-从源码构建)
 - [⚙️ 守护进程配置与命令行参数全景](#️-守护进程配置与命令行参数全景)
 - [🤖 接入个人 AI 助理 (Webhook Bridge)](#-接入个人-ai-助理-webhook-bridge)
+- [📊 数据出口与集成 (Data Egress & Integration)](#-数据出口与集成-data-egress--integration)
 - [❓ 常见问题与排错指南 (FAQ)](#-常见问题与排错指南-faq)
 - [📚 详细文档导航](#-详细文档导航)
 - [🔒 安全政策与免责声明](#-安全政策与免责声明)
@@ -209,6 +210,16 @@ python3 clients/assistant_webhook.py --poll-interval 5
 ```
 
 ---
+### 📊 数据出口与集成 (Data Egress & Integration)
+
+`wx-pad-exporter` 输出标准化的时间点快照（Point-in-Time Snapshot），与 Linux 家服微信中心（`wechat-vault` / Muse 微信早报系统）保持 100% 架构对齐：
+- **[数据出口契约与快照规范 (`docs/DATA_CONTRACT.md`)](docs/DATA_CONTRACT.md)**：包含 Canonical JSON + SHA-256 完整性摘要算法、游标水印（Watermark Cursor）推进机制、数据字典与脱敏样例。
+- **[集成指南与消费配方 (`docs/INTEGRATIONS.md`)](docs/INTEGRATIONS.md)**：涵盖 Muse 早报风格（Poll + Snapshot）、Grok/Dify 机器人风格（Webhook Push）、以及通用 Coding Agent（Claude Code / Pi / omp / Codex）直接拉取上下文三种标准消费架构。
+- **[Agent 技能扩展接缝 (`docs/AGENT_SKILLS.md`)](docs/AGENT_SKILLS.md)**：为未来的聊天流时间线可视化、社群关系图谱等技能预留标准化接口。
+- **[标准数据快照 JSON Schema (`schema/export.schema.json`)](schema/export.schema.json)**：提供机器可验证的 Draft 2020-12 规范模式。
+
+---
+
 
 ### ❓ 常见问题与排错指南 (FAQ)
 
@@ -252,11 +263,12 @@ echo "微信真实 UID: $DETECTED_UID"
 - [RESTful 接口详细规范 (API Specification)](docs/API_SPEC.md)
 - [系统架构与高可用设计 (Architecture)](docs/ARCHITECTURE.md)
 - [安全组网与端口暴露防护指南 (Networking)](docs/NETWORKING.md)
-- [设备端初始化与配置全书 (Setup Guide)](docs/SETUP_GUIDE.md)
+- [数据出口契约与快照规范 (Data Contract)](docs/DATA_CONTRACT.md)
+- [集成指南与消费配方 (Integration Recipes)](docs/INTEGRATIONS.md)
+- [Agent 技能拓展契约与可视化扩展点 (Agent Skills)](docs/AGENT_SKILLS.md)
+- [标准数据快照 JSON Schema (JSON Schema)](schema/export.schema.json)
 - [Dify / 飞书机器人对接指南](docs/integrations/personal_assistant.md)
 - [青龙面板定时调度指南](docs/integrations/qinglong.md)
-
----
 
 ### 🔒 安全政策与免责声明
 
@@ -296,6 +308,7 @@ echo "微信真实 UID: $DETECTED_UID"
 - [🛠️ Build from Source](#️-build-from-source-1)
 - [⚙️ Daemon Configuration & CLI Flag Reference](#️-daemon-configuration--cli-flag-reference)
 - [🤖 Personal AI Assistant Integration (Webhook Bridge)](#-personal-ai-assistant-integration-webhook-bridge)
+- [📊 Data Egress & Integration](#-data-egress--integration)
 - [❓ FAQ & Troubleshooting](#-faq--troubleshooting-1)
 - [📚 Documentation Index](#-documentation-index-1)
 - [🔒 Security & Disclaimer](#-security--disclaimer-1)
@@ -478,6 +491,16 @@ python3 clients/assistant_webhook.py --poll-interval 5
 ```
 
 ---
+### 📊 Data Egress & Integration
+
+`wx-pad-exporter` produces standardized point-in-time snapshots, architecturally aligned with the Linux homelab WeChat vault (`wechat-vault` / Muse daily digest system):
+- **[Data Egress & Snapshot Contract (`docs/DATA_CONTRACT.md`)](docs/DATA_CONTRACT.md)**: Details the Canonical JSON + SHA-256 manifest algorithm, Watermark Cursor pagination, field dictionaries, and sanitized samples.
+- **[Integration Recipes & Consumer Guides (`docs/INTEGRATIONS.md`)](docs/INTEGRATIONS.md)**: Features Muse-style digest pipelines (poll + snapshot), Grok/chatbot webhooks, and generic coding agent recipes.
+- **[Agent Skills Extension Hook (`docs/AGENT_SKILLS.md`)](docs/AGENT_SKILLS.md)**: Defines forward-compatible seams for future chat visualization and interaction analytics skills.
+- **[Standard Snapshot JSON Schema (`schema/export.schema.json`)](schema/export.schema.json)**: Machine-verifiable Draft 2020-12 JSON Schema.
+
+---
+
 
 ### ❓ FAQ & Troubleshooting
 
@@ -519,18 +542,13 @@ echo "Detected UID: $DETECTED_UID"
 - [RESTful API Specification](docs/API_SPEC.md)
 - [System Architecture & Reliability](docs/ARCHITECTURE.md)
 - [Networking & Secure Port Forwarding](docs/NETWORKING.md)
+- [Data Egress & Snapshot Contract](docs/DATA_CONTRACT.md)
+- [Integration Recipes & Consumer Guides](docs/INTEGRATIONS.md)
+- [Agent Skills & Visualization Extension Hook](docs/AGENT_SKILLS.md)
+- [Standard Snapshot JSON Schema](schema/export.schema.json)
 - [Device Setup & Provisioning Guide](docs/SETUP_GUIDE.md)
 - [Personal Assistant Webhook Integration (Dify & Feishu)](docs/integrations/personal_assistant.md)
 - [QingLong Panel Scheduled Dispatch](docs/integrations/qinglong.md)
-
----
-
-### 🔒 Security & Disclaimer
-
-- [Disclaimer (DISCLAIMER.md)](DISCLAIMER.md)
-- [Security Policy (SECURITY.md)](SECURITY.md)
-- [Contributing Guidelines (CONTRIBUTING.md)](CONTRIBUTING.md)
-
 ---
 
 ### 📄 License

@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/yaping-pro/wx-pad-exporter/main/schema/export.schema.json",
+  "title": "WeChatExportPayload",
+  "description": "Standard export snapshot payload emitted by wx-pad-exporter and homelab wechat-export-api.",
+  "type": "object",
+  "required": [
+    "exported_at",
+    "range",
+    "watermark",
+    "chats",
+    "manifest"
+  ],
+  "properties": {
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the export payload was generated (RFC3339 with timezone offset, e.g. +08:00)."
+    },
+    "range": {
+      "type": "object",
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start timestamp of query window (RFC3339 with timezone offset)."
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End timestamp of query window (RFC3339 with timezone offset)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "watermark": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cursor for incremental sync: the max message timestamp in this payload, or 'to' if empty."
+    },
+    "chats": {
+      "type": "array",
+      "description": "Aggregated chat conversation items.",
+      "items": {
+        "$ref": "#/$defs/chatItem"
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "required": [
+        "sha256",
+        "message_count"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Canonical SHA-256 hex digest of the chats array bytes."
+        },
+        "message_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of messages included across all chats in this payload."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "chatItem": {
+      "type": "object",
+      "required": [
+        "name",
+        "kind",
+        "messages"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable display name for the chat (display name, remark name, or fallback chat_id)."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "single",
+            "group"
+          ],
+          "description": "Chat topology kind."
+        },
+        "chat_id": {
+          "type": "string",
+          "description": "Native identifier of the conversation (e.g. wxid_xxx or xxx@chatroom). Mobile superset field."
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Raw display or nickname before fallback. Mobile superset field."
+        },
+        "is_group": {
+          "type": "boolean",
+          "description": "Boolean flag indicating whether the conversation is a group. Mobile superset field."
+        },
+        "messages": {
+          "type": "array",
+          "description": "Chronologically ordered messages for this chat.",
+          "items": {
+            "$ref": "#/$defs/messageItem"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "messageItem": {
+      "type": "object",
+      "required": [
+        "ts",
+        "sender",
+        "kind",
+        "text",
+        "note"
+      ],
+      "properties": {
+        "ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Message creation timestamp in RFC3339 format."
+        },
+        "sender": {
+          "type": "string",
+          "description": "Sender display name or identifier (homelab provides display/我; phone provides wxid/self/我)."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "text",
+            "image",
+            "voice",
+            "video",
+            "file",
+            "link",
+            "other"
+          ],
+          "description": "Normalized message kind."
+        },
+        "text": {
+          "type": "string",
+          "description": "Plain text content or raw XML payload for complex AppMsg cards."
+        },
+        "note": {
+          "type": "string",
+          "description": "Human-readable auxiliary description of the message (e.g. '图片', '语音', '卡片/链接/文件')."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
