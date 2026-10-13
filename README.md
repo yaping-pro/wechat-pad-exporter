@@ -25,9 +25,10 @@
 - [📊 数据出口与集成 (Data Egress & Integration)](#-数据出口与集成-data-egress--integration)
 - [❓ 常见问题与排错指南 (FAQ)](#-常见问题与排错指南-faq)
 - [📚 详细文档导航](#-详细文档导航)
+- [🤝 兄弟项目 (Sibling Projects)](#-兄弟项目-sibling-projects)
 - [🔒 安全政策与免责声明](#-安全政策与免责声明)
-- [💬 交流群 / Community](#-交流群--community)
 - [📄 开源许可证](#-开源许可证)
+- [💬 交流群 / Community](#-交流群--community)
 
 ### 🤖 交给你的 AI Agent (Autonomous Agent Runbook)
 
@@ -270,6 +271,20 @@ echo "微信真实 UID: $DETECTED_UID"
 - [Dify / 飞书机器人对接指南](docs/integrations/personal_assistant.md)
 - [青龙面板定时调度指南](docs/integrations/qinglong.md)
 
+---
+
+### 🤝 兄弟项目 (Sibling Projects)
+
+本项目是微信个人数据自主权与本地 AI 助理工具套件的一部分：
+
+| 项目 | 说明 | 状态 / 链接 |
+| :--- | :--- | :--- |
+| **`wx-tablet-mode`** | 微信安卓平板模式辅助与环境治理套件（外观伪装 + 内置第一方平板登录资格 Hook，单 APK 自包含，实现免打扰双登） | [yaping-pro/wx-tablet-mode](https://github.com/yaping-pro/wx-tablet-mode) |
+| **`wx-pad-exporter`** (当前项目) | Pad 版微信实时聊天流只读导出守护进程 + 通用 Webhook / 个人 AI 助理数据管道（Xposed 探针 + Go 守护进程） | [yaping-pro/wx-pad-exporter](https://github.com/yaping-pro/wx-pad-exporter) |
+| **`wx-linux-exporter`** | Linux 原生 / 容器化微信导出管道（Linux 端微信消息只读导出与助理桥接） | [yaping-pro/wx-linux-exporter](https://github.com/yaping-pro/wx-linux-exporter) |
+
+---
+
 ### 🔒 安全政策与免责声明
 
 - [开源免责声明 (DISCLAIMER.md)](DISCLAIMER.md)
@@ -311,9 +326,10 @@ echo "微信真实 UID: $DETECTED_UID"
 - [📊 Data Egress & Integration](#-data-egress--integration)
 - [❓ FAQ & Troubleshooting](#-faq--troubleshooting-1)
 - [📚 Documentation Index](#-documentation-index-1)
+- [🤝 Sibling Projects](#-sibling-projects)
 - [🔒 Security & Disclaimer](#-security--disclaimer-1)
-- [💬 Community](#-community-1)
 - [📄 License](#-license-1)
+- [💬 Community](#-community-1)
 
 ### 🤖 Hand It to Your AI Agent (Autonomous Runbook)
 
@@ -549,8 +565,28 @@ echo "Detected UID: $DETECTED_UID"
 - [Device Setup & Provisioning Guide](docs/SETUP_GUIDE.md)
 - [Personal Assistant Webhook Integration (Dify & Feishu)](docs/integrations/personal_assistant.md)
 - [QingLong Panel Scheduled Dispatch](docs/integrations/qinglong.md)
+
 ---
 
+### 🤝 Sibling Projects
+
+This repository is part of a toolkit suite for WeChat personal data sovereignty and local AI assistant pipelines:
+
+| Project | Description | Link |
+| :--- | :--- | :--- |
+| **`wx-tablet-mode`** | Android tablet-mode coexistence toolkit with built-in first-party pad-login hook & appearance disguise (self-contained single APK). | [yaping-pro/wx-tablet-mode](https://github.com/yaping-pro/wx-tablet-mode) |
+| **`wx-pad-exporter`** (Current) | Read-only realtime chat stream exporter daemon & universal assistant webhook bridge for tablet-mode WeChat (Xposed hook + Go daemon). | [yaping-pro/wx-pad-exporter](https://github.com/yaping-pro/wx-pad-exporter) |
+| **`wx-linux-exporter`** | Linux-native / containerized WeChat chatstream exporter pipeline & assistant bridge. | [yaping-pro/wx-linux-exporter](https://github.com/yaping-pro/wx-linux-exporter) |
+
+---
+
+### 🔒 Security & Disclaimer
+
+- [Disclaimer (DISCLAIMER.md)](DISCLAIMER.md)
+- [Security Policy (SECURITY.md)](SECURITY.md)
+- [Contributing Guidelines (CONTRIBUTING.md)](CONTRIBUTING.md)
+
+---
 ### 📄 License
 
 Distributed under the [MIT License](LICENSE).

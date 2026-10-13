@@ -30,17 +30,26 @@ env/
 venv/
 ENV/
 
-# Secret tokens, private keys and runtime vaults
+# Secret tokens, private keys and runtime vaults (Hard boundaries)
 *.pem
 *.key
 *.crt
 *.pfx
 *.p12
 *ts_auth_key*
+*tskey-*
+tskey-*
+*auth_key*
 auth_key*
+*AKIA*
+*sk-*
+sk-*
+*ghp_*
+ghp_*
 *device_token*
 *export_token*
 *.token
+*secret*
 vault.db*
 *.db
 *.sqlite
