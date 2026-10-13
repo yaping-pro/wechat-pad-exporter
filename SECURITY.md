@@ -11,10 +11,10 @@
 
 如果您在本项目中发现了潜在的安全漏洞或凭据泄露风险，请**切勿在公开的 GitHub Issues 中提交**。
 
-请遵循负责任的漏洞披露流程（Responsible Disclosure）：
-1. 通过电子邮件向维护团队报告：`security@yaping.pro`
+请通过 GitHub 官方支持的 **Private Vulnerability Reporting** 私密通道报告：
+1. 访问本仓库的 Security 页面：`https://github.com/yaping-pro/wx-pad-exporter/security/advisories/new`（或在仓库页面点击 **Security** 标签页中的 **Report a vulnerability**）。
 2. 报告应包含漏洞复现步骤、PoC 样例以及预估的影响范围。
-3. 我们会在 48 小时内确认收到报告，并在修复方案验证通过后发布安全补丁公告。
+3. 维护者会在确认收到报告后及时评估风险，并在修复方案验证通过后发布安全补丁与安全通报。
 
 ## 核心安全加固规范 (Hardening Guidelines)
 
