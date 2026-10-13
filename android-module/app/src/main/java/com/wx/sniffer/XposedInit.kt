@@ -2,13 +2,13 @@ package com.wx.sniffer
 
 import android.util.Log
 import com.wx.sniffer.hook.DexKitSniffer
-import com.wx.sniffer.pad.PadDisguise
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
  * XposedInit serves as the main entry point for the LSPosed module.
- * It intercepts the WeChat application lifecycle and initializes PadDisguise and DexKitSniffer.
+ * It intercepts the WeChat application lifecycle and initializes DexKitSniffer
+ * for real-time, read-only data extraction.
  */
 class XposedInit : IXposedHookLoadPackage {
 
@@ -23,25 +23,18 @@ class XposedInit : IXposedHookLoadPackage {
         }
 
         val processName = lpparam.processName
-        Log.i(TAG, "Initializing WX-Pad-Sniffer in process: $processName (package: ${lpparam.packageName})")
+        Log.i(TAG, "Initializing WX-Sniffer in process: $processName (package: ${lpparam.packageName})")
 
         try {
-            // 1. Apply Pad disguise and portrait lock.
-            // PadDisguise is gated by the system property persist.wx.sniffer.pad_disguise
-            // (default enabled; set to "0" to disable without recompiling). Disabling is
-            // recommended when coexisting with com.roro.tablethook so TabletHook alone owns
-            // the tablet disguise and the proven u999 login is preserved.
-            PadDisguise.apply(lpparam)
-
-            // 2. Initialize non-blocking message sniffer
+            // Initialize non-blocking message sniffer
             // Sniffer is active on main and push processes
             if (processName == TARGET_PACKAGE || processName.endsWith(":push") || processName.endsWith(":tools")) {
                 DexKitSniffer.init(lpparam)
             }
 
-            Log.i(TAG, "WX-Pad-Sniffer modules initialized successfully for $processName")
+            Log.i(TAG, "WX-Sniffer module initialized successfully for $processName")
         } catch (e: Throwable) {
-            Log.e(TAG, "Fatal error initializing WX-Pad-Sniffer: ${e.message}", e)
+            Log.e(TAG, "Fatal error initializing WX-Sniffer: ${e.message}", e)
         }
     }
 }

@@ -174,11 +174,11 @@ type ExportMessageItem struct {
 
 ## B2. Hook 模块（喂 UDS 的那个 LSPosed 模块）是否已存在产物？
 - **源码在 Mac 上（完整 Kotlin）**：`/Users/<USER>/Projects/wx-pad-sniffer/android-module/app/src/main/java/com/wx/sniffer/`
-  - `XposedInit.kt`、`hook/DexKitSniffer.kt`、`pad/PadDisguise.kt`、`ipc/RingBufferSender.kt`
+  - `XposedInit.kt`、`hook/DexKitSniffer.kt`、`ipc/RingBufferSender.kt`
   - `assets/xposed_init` = `com.wx.sniffer.XposedInit`
   - `build.gradle.kts` / `AndroidManifest.xml` 齐全
 - **设备侧 APK 产物**：`/data/local/tmp/` 下有 `WeChatPad.apk` / `WeChatTablet.apk` / `LSPosed.zip`，但 **未找到 `wx-pad-sniffer` 模块自己的编译 APK**（grep/ls 无 `sniffer*.apk`）。即 **Hook 模块源码存在、尚未编译安装到这台设备**。
-- **与已装模块关系**：当前 user 999 登录走的是 `com.roro.tablethook`（TabletHook，见 SUCCESS_SUMMARY.md），**不是** 这个 `wx-pad-sniffer` 模块。两者职责不同：tablethook=平板伪装登录，wx-pad-sniffer=消息抓取+UDS 推送（含自带 PadDisguise）。
+- **与已装模块关系**：当前 user 999 登录走的是 `com.roro.tablethook`（TabletHook，见 SUCCESS_SUMMARY.md），**不是** 这个 `wx-pad-sniffer` 模块。两者职责不同：tablethook=平板伪装登录，wx-pad-sniffer=消息抓取+UDS 推送。
 
 ## B3. daemon HTTP 端点现在能否实测到？（原文回显）
 ```bash
@@ -245,6 +245,6 @@ pm path com.artemis.helper
 - **`wx_daemon`（Go 守护进程）：已基本"接线即可"** —— 源码与 ARM64 二进制齐备，已在手机 8765 端口运行，HTTP/存储/UDS 监听全通，仅差上游连入。
 - **但采集端（Hook 模块）目前是"源码就绪、未编译未安装、未接线"**：`wx-pad-sniffer/android-module` 的 Kotlin 源码完整，但本机**没有它的编译 APK**，且当前 user 999 微信挂的是 `com.roro.tablethook`（只做平板登录，不抓消息、不连 UDS）。
 
-→ **结论：不是"从零新写"，而是"编译并安装既有 Hook 模块 + 把它接入已运行的 daemon"**。工作量=① `gradle assemble` 出 `wx-pad-sniffer` APK；② 作为 LSPosed 模块装到 user 999 并加作用域；③ 在 Vector/LSPosed 中启用（注意与 `com.roro.tablethook` 的 PadDisguise 是否冲突，或改用本模块自带的 `PadDisguise` 替代 tablethook）；④ 起 Tailscale/穿透让云端 agent 访问 8765。守护进程侧零新代码。
+→ **结论：不是"从零新写"，而是"编译并安装既有 Hook 模块 + 把它接入已运行的 daemon"**。工作量=① `gradle assemble` 出 `wx-pad-sniffer` APK；② 作为 LSPosed 模块装到 user 999 并加作用域；③ 在 Vector/LSPosed 中启用；④ 起 Tailscale/穿透让云端 agent 访问 8765。守护进程侧零新代码。
 
 **纯离线读库已不可行**（C1）：8.0.78 用 WCDB 2.0 动态密钥，`MD5(IMEI+UIN)[0:7]` 失效，无内存取密钥无法离线解密——这也正是本工程走"Hook 进内存拿明文、经 UDS 推给 daemon"路线的根本理由。
