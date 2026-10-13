@@ -28,14 +28,26 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android-module/gradlew
 
+      - name: Decode Android Release Keystore
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
       - name: Build Release APK
         working-directory: android-module
         run: ./gradlew assembleRelease --stacktrace
+        env:
+          ANDROID_KEYSTORE_FILE: /tmp/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Prepare Named Release Assets
+      - name: Prepare Named Release Assets and Verify Signature
         run: |
           mkdir -p release-assets
-          TAG_NAME="${GITHUB_REF_NAME:-v1.0.1}"
+          TAG_NAME="${GITHUB_REF_NAME:-v1.0.3}"
           SRC_APK=$(ls android-module/app/build/outputs/apk/release/*.apk | head -n 1)
           if [ -z "$SRC_APK" ] || [ ! -f "$SRC_APK" ]; then
             echo "::error::Release APK not found in android-module/app/build/outputs/apk/release/"
@@ -44,6 +56,21 @@ jobs:
           TARGET_APK="release-assets/wechat-pad-exporter-module-${TAG_NAME}.apk"
           cp "$SRC_APK" "$TARGET_APK"
           echo "Prepared asset: $TARGET_APK ($(ls -lh "$TARGET_APK" | awk '{print $5}'))"
+
+          echo "Verifying APK Signature..."
+          if command -v apksigner >/dev/null 2>&1; then
+            apksigner verify --verbose "$TARGET_APK"
+          else
+            $ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$TARGET_APK" || \
+            find $ANDROID_HOME/build-tools/ -name apksigner -exec {} verify --verbose "$TARGET_APK" \;
+          fi
+
+          # Hard gate: must contain META-INF signing cert
+          if ! unzip -l "$TARGET_APK" | grep -E "META-INF/.*\.(RSA|DSA|EC)"; then
+            echo "::error::APK signature verification failed: No META-INF signature certificate found!"
+            exit 1
+          fi
+          echo "Signature verification passed successfully!"
 
       - name: Upload Sniffer APK
         uses: actions/upload-artifact@v4
