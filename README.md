@@ -15,6 +15,7 @@
 ## 中文
 
 ### 目录
+- [🤖 交给你的 AI Agent (Autonomous Agent Runbook)](#-交给你的-ai-agent-autonomous-agent-runbook)
 - [💡 项目定位与核心特性](#-项目定位与核心特性)
 - [⚠️ 前置要求与只读边界声明](#-前置要求与只读边界声明)
 - [⚡ 30 秒极速上手 (Quickstart)](#-30-秒极速上手-quickstart)
@@ -25,6 +26,19 @@
 - [📚 详细文档导航](#-详细文档导航)
 - [🔒 安全政策与免责声明](#-安全政策与免责声明)
 - [📄 开源许可证](#-开源许可证)
+
+### 🤖 交给你的 AI Agent (Autonomous Agent Runbook)
+
+如果你使用的是 AI 辅助编码或自动化智能体（如 Claude Code、Pi/omp、Codex、Cursor 等），**你只需完成「Root 设备 + 开启 USB 调试 + 插上电脑」，其余所有安装、配置与健康验证均可全权交给 Agent 自动执行**。
+
+详细的 Agent 确定性执行协议、预检硬门禁、安全红线与回滚命令详见：  
+👉 **[`AGENT.md`](AGENT.md)**
+
+Agent 执行简明指令：
+```bash
+# 直接向你的 AI Agent 提供本仓库与目标设备
+"请阅读 AGENT.md，在当前连接的 Android 设备上自主完成 wechat-pad-exporter 的完整部署、配置与健康检查。"
+```
 
 ---
 
@@ -260,6 +274,7 @@ echo "微信真实 UID: $DETECTED_UID"
 ## English
 
 ### Table of Contents
+- [🤖 Hand It to Your AI Agent (Autonomous Runbook)](#-hand-it-to-your-ai-agent-autonomous-runbook)
 - [💡 Overview & Core Capabilities](#-overview--core-capabilities)
 - [⚠️ Prerequisites & Read-Only Boundaries](#-prerequisites--read-only-boundaries)
 - [⚡ 30-Second Quickstart](#-30-second-quickstart-1)
@@ -270,6 +285,18 @@ echo "微信真实 UID: $DETECTED_UID"
 - [📚 Documentation Index](#-documentation-index-1)
 - [🔒 Security & Disclaimer](#-security--disclaimer-1)
 - [📄 License](#-license-1)
+
+### 🤖 Hand It to Your AI Agent (Autonomous Runbook)
+
+If you are using an AI coding agent or autonomous tool (such as Claude Code, Pi/omp, Codex, or Cursor), **you only need to "root the device, enable USB debugging, and plug it into your computer" — your agent can handle everything else autonomously.**
+
+For machine-executable preflight gates, ordered installation steps, safety invariants, and verification criteria:  
+👉 **[`AGENT.md`](AGENT.md)**
+
+Prompt your agent:
+```text
+"Read AGENT.md and autonomously execute the complete installation, configuration, and verification pipeline on the connected Android device."
+```
 
 ---
 
