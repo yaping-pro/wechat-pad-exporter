@@ -32,6 +32,8 @@ android {
                 storePassword = keystorePassword
                 this.keyAlias = keyAlias
                 this.keyPassword = keyPassword
+                enableV1Signing = true
+                enableV2Signing = true
             } else if (requireSigning) {
                 throw GradleException("Release signing credentials missing while requireSigning is active. Keystore file exists: ${keystoreFile?.exists() == true}")
             }
