@@ -71,13 +71,13 @@ Agent 执行简明指令：
 
 #### 步骤 1：下载预编译发布产物
 前往 [GitHub Releases 最新发布页](https://github.com/yaping-pro/wx-pad-exporter/releases/latest) 下载：
-- `wechat-pad-exporter-module-v1.0.1.apk` (Xposed 探针模块)
+- `wechat-pad-exporter-module-v1.0.2.apk` (Xposed 探针模块)
 - `wx_daemon-android-arm64` (Android 设备端守护进程二进制)
 
 #### 步骤 2：安装探针并加入 LSPosed / Vector 作用域
 ```bash
 # 安装 Xposed 探针 APK
-adb install -r wechat-pad-exporter-module-v1.0.1.apk
+adb install -r wechat-pad-exporter-module-v1.0.2.apk
 ```
 打开 LSPosed / Vector 管理器：
 - 启用 `com.wx.sniffer` (WeChat Pad Exporter)；
@@ -169,8 +169,8 @@ CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -ldflags="-s -w" -o wx_daemon .
 | `-http` | string | `127.0.0.1:8765` | HTTP 服务监听地址及端口 (生产环境务必保持回环) |
 | `-db` | string | `/data/adb/wx_stream/vault.db` | SQLite 存储库路径 (WAL 模式持久化) |
 | `-uds` | string | `@wechat_stream_ipc` | Unix Domain Socket 地址 (以 `@` 开头代表 Linux 抽象命名空间) |
-| `-token` | string | `""` | API 调用的 Bearer 鉴权 Token |
-| `-no-auth` | bool | `false` | 显式禁用 Token 鉴权 (仅限封闭受信任调试环境) |
+| `-token` | string | `""` | API 调用的 Bearer 鉴权 Token (默认必填；若为空则拒绝启动) |
+| `-no-auth` / `-insecure-no-auth` | bool | `false` | 显式禁用 Token 鉴权 (仅限封闭受信任调试环境) |
 | `-retain-days` | int | `-1` | 消息落库保留天数 (超过则自动剪裁；`0` 表示永久保留) |
 | `-log-file` | string | `""` | 日志输出路径 (留空则仅向 stderr 输出) |
 | `-log-max-bytes` | int64 | `-1` | 单个日志文件最大字节数，触发自动切割轮转 |
@@ -295,7 +295,7 @@ echo "微信真实 UID: $DETECTED_UID"
 
 ### 📄 开源许可证
 
-本项目基于 [MIT License](LICENSE) 开源。
+本项目基于 [MIT License](LICENSE) 开源。第三方依赖组件许可及版权信息参见 [NOTICE](NOTICE)。
 
 ---
 
@@ -371,13 +371,13 @@ Prompt your agent:
 
 #### Step 1: Download Release Artifacts
 Visit the [GitHub Releases Latest Page](https://github.com/yaping-pro/wx-pad-exporter/releases/latest) and download:
-- `wechat-pad-exporter-module-v1.0.1.apk` (Xposed probe module)
+- `wechat-pad-exporter-module-v1.0.2.apk` (Xposed probe module)
 - `wx_daemon-android-arm64` (Android device daemon binary)
 
 #### Step 2: Install Probe & Enable in LSPosed / Vector
 ```bash
 # Install module APK
-adb install -r wechat-pad-exporter-module-v1.0.1.apk
+adb install -r wechat-pad-exporter-module-v1.0.2.apk
 ```
 Open LSPosed / Vector Manager:
 - Enable module `com.wx.sniffer` (WeChat Pad Exporter);
@@ -466,8 +466,8 @@ The daemon accepts a JSON configuration file via `-config` as well as direct com
 | `-http` | string | `127.0.0.1:8765` | HTTP listen address and port |
 | `-db` | string | `/data/adb/wx_stream/vault.db` | Path to SQLite storage file (WAL mode) |
 | `-uds` | string | `@wechat_stream_ipc` | Unix Domain Socket address (`@` prefix denotes Linux abstract socket) |
-| `-token` | string | `""` | Bearer token for API authentication |
-| `-no-auth` | bool | `false` | Explicitly disables API token authorization |
+| `-token` | string | `""` | Bearer token for API authentication (required by default; daemon refuses to start if empty) |
+| `-no-auth` / `-insecure-no-auth` | bool | `false` | Explicitly disables API token authorization (unauthenticated dev mode) |
 | `-retain-days` | int | `-1` | Message retention window in days (`0` disables pruning) |
 | `-log-file` | string | `""` | Log file destination (empty logs to stderr) |
 | `-log-max-bytes` | int64 | `-1` | Max log bytes before triggering log rotation |
@@ -589,7 +589,7 @@ This repository is part of a toolkit suite for WeChat personal data sovereignty 
 ---
 ### 📄 License
 
-Distributed under the [MIT License](LICENSE).
+Distributed under the [MIT License](LICENSE). Third-party dependencies and notices are documented in [NOTICE](NOTICE).
 
 ---
 

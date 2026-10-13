@@ -5,7 +5,7 @@ Fetch WeChat chat exports from phone endpoint (or Homelab export API) over Tails
 
 Compatible with both:
 1. Phone wx_daemon endpoint: http://<TAILNET_IP>:8765/api/wechat/export
-2. Homelab Linux1 export API: http://100.67.x.x:8765/api/wechat/export
+2. Homelab Linux1 export API: http://<TAILNET_IP>:8765/api/wechat/export
 """
 
 from __future__ import annotations

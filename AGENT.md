@@ -142,7 +142,7 @@ chmod 600 /data/adb/wx_stream/config.json'"
 ### Step 2: Install Xposed Sniffer Module APK & Scope Configuration
 ```bash
 # Push and install module APK
-$ADB install -r wechat-pad-exporter-module-v1.0.1.apk
+$ADB install -r wechat-pad-exporter-module-v1.0.2.apk
 
 # If target user is a secondary user (e.g. 999), install into secondary user profile:
 if [ "$TARGET_USER" -ne 0 ]; then

@@ -77,11 +77,19 @@ def format_payload(
     msg: Dict[str, Any],
 ) -> Dict[str, Any]:
     sender = msg.get("sender", "")
-    content = msg.get("content", "")
-    msg_type = msg.get("type", "text")
     ts = msg.get("ts", "")
+    kind = msg.get("kind", msg.get("type", "text"))
+    text = msg.get("text", msg.get("content", ""))
+    note = msg.get("note", "")
+
+    # Backwards-compatible content extraction: if text is empty, fall back to note tag
+    content = text if text else (f"[{note}]" if note else "")
     msg_id = msg.get("id", "")
-    is_sender = msg.get("is_sender", False)
+    is_sender = (
+        msg.get("is_sender")
+        if "is_sender" in msg
+        else (sender in ("self", "我"))
+    )
 
     if webhook_type == "feishu":
         # Format as Feishu interactive / text webhook payload
@@ -100,10 +108,13 @@ def format_payload(
                 "chat_id": chat_id,
                 "sender": sender,
                 "content": content,
-                "msg_type": msg_type,
+                "msg_type": kind,
                 "timestamp": ts,
                 "is_sender": is_sender,
                 "raw_id": msg_id,
+                "kind": kind,
+                "text": text,
+                "note": note,
             },
             "response_mode": "streaming",
             "user": sender or chat_id,
@@ -116,12 +127,14 @@ def format_payload(
         "sender": sender,
         "is_sender": is_sender,
         "content": content,
-        "type": msg_type,
+        "type": kind,
+        "kind": kind,
+        "text": text,
+        "note": note,
         "timestamp": ts,
+        "ts": ts,
         "id": msg_id,
     }
-
-
 def post_webhook(
     webhook_url: str,
     payload: Dict[str, Any],
@@ -163,7 +176,12 @@ def process_chats(
         chat_id = chat.get("chat_id", "unknown")
         messages = chat.get("messages", [])
         for msg in messages:
-            if ignore_self and msg.get("is_sender"):
+            is_sender = (
+                msg.get("is_sender")
+                if "is_sender" in msg
+                else (msg.get("sender") in ("self", "我"))
+            )
+            if ignore_self and is_sender:
                 continue
             payload = format_payload(webhook_type, chat_id, msg)
             ok = post_webhook(webhook_url, payload, dry_run=dry_run)

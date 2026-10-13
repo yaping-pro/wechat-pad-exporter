@@ -400,3 +400,70 @@ func TestContractWatermarkFallbackWhenEmpty(t *testing.T) {
 		t.Errorf("expected message_count=0, got %d", resp.Manifest.MessageCount)
 	}
 }
+
+// 6. Test Query Parameter 'limit' enforcement (F-004)
+func TestContractLimitParam(t *testing.T) {
+	store, router, tmpDir := setupTestDBAndServer(t, "")
+	defer store.Close()
+	defer os.RemoveAll(tmpDir)
+
+	baseTs := int64(1791000000)
+	// Insert 15 messages
+	for i := range 15 {
+		msg := &NormalizedMessage{
+			MsgId:       FormatRFC3339Epoch(baseTs + int64(i)),
+			ChatId:      "test_chat_001",
+			DisplayName: "Test Chat",
+			IsGroup:     false,
+			Sender:      "wxid_user",
+			Kind:        "text",
+			Text:        FormatRFC3339Epoch(baseTs + int64(i)),
+			Note:        "",
+			Ts:          baseTs + int64(i),
+		}
+		if err := store.SaveMessage(msg); err != nil {
+			t.Fatalf("failed to save msg %d: %v", i, err)
+		}
+	}
+
+	// A. Query with limit=5
+	req := httptest.NewRequest(http.MethodGet, "/api/wechat/export?since=1790900000&to=1792000000&limit=5", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	var resp ExportResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to parse JSON: %v", err)
+	}
+	if resp.Manifest.MessageCount != 5 {
+		t.Errorf("expected manifest.message_count=5 when limit=5, got %d", resp.Manifest.MessageCount)
+	}
+	if len(resp.Chats) != 1 || len(resp.Chats[0].Messages) != 5 {
+		t.Errorf("expected 5 messages in chat, got %d", len(resp.Chats[0].Messages))
+	}
+
+	// B. Query without limit (default is 500, so all 15 should return)
+	reqAll := httptest.NewRequest(http.MethodGet, "/api/wechat/export?since=1790900000&to=1792000000", nil)
+	recAll := httptest.NewRecorder()
+	router.ServeHTTP(recAll, reqAll)
+	if recAll.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", recAll.Code)
+	}
+	var respAll ExportResponse
+	if err := json.Unmarshal(recAll.Body.Bytes(), &respAll); err != nil {
+		t.Fatalf("failed to parse JSON: %v", err)
+	}
+	if respAll.Manifest.MessageCount != 15 {
+		t.Errorf("expected all 15 messages returned under default limit, got %d", respAll.Manifest.MessageCount)
+	}
+
+	// C. Query with invalid limit -> 400
+	reqBad := httptest.NewRequest(http.MethodGet, "/api/wechat/export?limit=invalid", nil)
+	recBad := httptest.NewRecorder()
+	router.ServeHTTP(recBad, reqBad)
+	if recBad.Code != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request on invalid limit, got %d", recBad.Code)
+	}
+}

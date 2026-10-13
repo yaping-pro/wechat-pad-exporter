@@ -284,6 +284,23 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			return
 		}
 
+		// Parse limit parameter (default 500, cap 2000, min 1)
+		limit := 500
+		if limitStr := query.Get("limit"); limitStr != "" {
+			if l, err := strconv.Atoi(limitStr); err == nil {
+				if l < 1 {
+					l = 1
+				} else if l > 2000 {
+					l = 2000
+				}
+				limit = l
+			} else {
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(map[string]string{"error": "invalid limit parameter"})
+				return
+			}
+		}
 		// Query SQLite messages within range
 		msgs, err := state.Store.QueryMessagesByRange(since, to)
 		if err != nil {
@@ -303,6 +320,10 @@ func SetupRouter(state *ServerState) *http.ServeMux {
 			// Apply chat filtering
 			if !state.IsChatAllowed(msg.ChatId, msg.DisplayName) {
 				continue
+			}
+
+			if filteredTotalCount >= limit {
+				break
 			}
 
 			filteredTotalCount++

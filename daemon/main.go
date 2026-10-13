@@ -50,10 +50,11 @@ func main() {
 		httpAddr    = flag.String("http", "", "HTTP listen address (e.g. 127.0.0.1:8765 or 0.0.0.0:8765)")
 		dbPath      = flag.String("db", "", "Path to SQLite database")
 		udsAddr     = flag.String("uds", "", "Unix Domain Socket address (use @ for Linux abstract socket)")
-		token       = flag.String("token", "", "Bearer token for API authorization")
-		noAuth      = flag.Bool("no-auth", false, "Explicitly disable Bearer token authorization")
-		retainDays  = flag.Int("retain-days", -1, "Days of messages to retain (0 disables pruning)")
-		logMaxBytes = flag.Int64("log-max-bytes", -1, "Max log file bytes before rotation")
+		token          = flag.String("token", "", "Bearer token for API authorization")
+		noAuth         = flag.Bool("no-auth", false, "Explicitly disable Bearer token authorization")
+		insecureNoAuth = flag.Bool("insecure-no-auth", false, "Explicitly allow unauthenticated access when token is empty")
+		retainDays     = flag.Int("retain-days", -1, "Days of messages to retain (0 disables pruning)")
+		logMaxBytes    = flag.Int64("log-max-bytes", -1, "Max log file bytes before rotation")
 		logKeep     = flag.Int("log-keep", -1, "Number of rotated log backups to retain")
 		logFile     = flag.String("log-file", "", "Log file path for rotation (empty = write to stderr only)")
 	)
@@ -94,7 +95,7 @@ func main() {
 	if *token != "" {
 		cfg.Token = *token
 	}
-	if *noAuth {
+	if *noAuth || *insecureNoAuth {
 		val := false
 		cfg.Auth = &val
 	}
@@ -122,17 +123,14 @@ func main() {
 		}
 	}
 
-	// Compute effective AuthEnabled
+	// Compute effective AuthEnabled (Fail closed)
 	authEnabled := true
 	if cfg.Auth != nil && !*cfg.Auth {
 		authEnabled = false
+		log.Printf("[WX-Daemon] WARNING: Authentication is EXPLICITLY DISABLED via config or -no-auth/-insecure-no-auth.")
 	} else if cfg.Token == "" {
-		// If no token is provided and auth was not explicitly set to false,
-		// default auth remains true (requests without token will be 401 until configured),
-		// or if running in legacy dev mode with empty token without config, we warn.
-		authEnabled = false
+		log.Fatalf("[WX-Daemon] FATAL: Authentication token is required but empty. To run unauthenticated, explicitly provide -no-auth or -insecure-no-auth flag (or \"auth\": false in config).")
 	}
-
 	finalHTTPAddr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 
 	log.Printf("[WX-Daemon] Starting wx-pad-sniffer daemon (OS=%s ARCH=%s)...", runtime.GOOS, runtime.GOARCH)

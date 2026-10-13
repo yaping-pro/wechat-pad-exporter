@@ -14,7 +14,7 @@ type DaemonConfig struct {
 	UdsPath      string   `json:"uds_path"`
 	DbPath       string   `json:"db_path"`
 	Token        string   `json:"token"`
-	Auth         *bool    `json:"auth,omitempty"` // nil = default true unless NoAuth flag or token empty
+	Auth         *bool    `json:"auth,omitempty"` // nil = default true (requires token; fails closed if token is empty)
 	AllowChats   []string `json:"allow_chats"`
 	BlockChats   []string `json:"block_chats"`
 	LogFile      string   `json:"log_file,omitempty"`

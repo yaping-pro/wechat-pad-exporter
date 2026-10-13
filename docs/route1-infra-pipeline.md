@@ -521,10 +521,10 @@ settings put global low_power_sticky 0
    ```
 2. **路由器静态 DHCP 分配**：在局域网路由器将抓取手机的 MAC 地址绑定静态 IP（如 `192.168.1.88`）。
 3. **Tailscale 异地零配置互通**：
-   - 手机端已通过 SFA / sing-box 接入用户 Tailnet 网络（虚拟 IP: `100.80.x.x`）。
+   - 手机端已通过 SFA / sing-box 接入用户 Tailnet 网络（虚拟 IP: `<TAILNET_IP>`）。
    - 外部守护进程将 REST API 仅监听在 `127.0.0.1:8765`（环回），由 sing-box 隧道内核将 Tailnet 目标 8765 流量转发给本地 127.0.0.1，保障隐私安全与网络隔离。
-   - **消费端接入端点**：`http://100.80.x.x:8765/api/wechat/export` 或 `/health`。
-   - **注意事项**：消费端（Mac / Linux）请**直接使用裸 IP `100.80.x.x`**。主机名 `<NODE_NAME>` 在 Mac 易被 Clash Fake-IP（198.18.0.x）劫持，在 Linux 易因 `/etc/resolv.conf` 路由器 DNS NXDOMAIN 截断而解析失败。
+   - **消费端接入端点**：`http://<TAILNET_IP>:8765/api/wechat/export` 或 `/health`。
+   - **注意事项**：消费端（Mac / Linux）请**直接使用裸 IP `<TAILNET_IP>`**。主机名 `<NODE_NAME>` 在 Mac 易被 Clash Fake-IP（198.18.0.x）劫持，在 Linux 易因 `/etc/resolv.conf` 路由器 DNS NXDOMAIN 截断而解析失败。
 ---
 
 ## 5. 关键核心代码实现落地
