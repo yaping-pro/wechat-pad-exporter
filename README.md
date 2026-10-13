@@ -25,6 +25,7 @@
 - [❓ 常见问题与排错指南 (FAQ)](#-常见问题与排错指南-faq)
 - [📚 详细文档导航](#-详细文档导航)
 - [🔒 安全政策与免责声明](#-安全政策与免责声明)
+- [💬 交流群 / Community](#-交流群--community)
 - [📄 开源许可证](#-开源许可证)
 
 ### 🤖 交给你的 AI Agent (Autonomous Agent Runbook)
@@ -271,6 +272,20 @@ echo "微信真实 UID: $DETECTED_UID"
 
 ---
 
+### 💬 交流群 / Community
+
+**微信个人助理交流**
+
+<p align="left">
+  <img src="assets/wechat-group-qr.png" alt="微信个人助理交流群" width="220" />
+</p>
+
+<!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
+
+> ⚠️ **群二维码时效提示**：微信群二维码具有 7 天有效期限（当前二维码有效期至 **2026-10-20**）。本仓库会定期维护轮换此二维码图片；若您扫码时提示已过期，请查阅仓库最新提交的 [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) 或在 [Issues](https://github.com/yaping-pro/wechat-pad-exporter/issues) 中留言反馈。
+
+---
+
 ## English
 
 ### Table of Contents
@@ -284,6 +299,7 @@ echo "微信真实 UID: $DETECTED_UID"
 - [❓ FAQ & Troubleshooting](#-faq--troubleshooting-1)
 - [📚 Documentation Index](#-documentation-index-1)
 - [🔒 Security & Disclaimer](#-security--disclaimer-1)
+- [💬 Community](#-community-1)
 - [📄 License](#-license-1)
 
 ### 🤖 Hand It to Your AI Agent (Autonomous Runbook)
@@ -520,3 +536,17 @@ echo "Detected UID: $DETECTED_UID"
 ### 📄 License
 
 Distributed under the [MIT License](LICENSE).
+
+---
+
+### 💬 Community
+
+**微信个人助理交流 (WeChat Personal Assistant Group)**
+
+<p align="left">
+  <img src="assets/wechat-group-qr.png" alt="WeChat Community Group QR" width="220" />
+</p>
+
+<!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
+
+> ⚠️ **QR Expiration Notice**: WeChat group invitation QR codes have limited validity (currently **valid until 2026-10-20**). The repository maintainers refresh this asset regularly. If the QR code has expired when you scan it, check the latest committed [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) on `main` or open an [Issue](https://github.com/yaping-pro/wechat-pad-exporter/issues).
