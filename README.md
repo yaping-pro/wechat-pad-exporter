@@ -186,7 +186,7 @@ adb forward tcp:8765 tcp:8765
 
 Verify health check:
 ```bash
-curl -H "Authorization: Bearer your_high_entropy_random_token" http://127.0.0.1:8765/health
+curl -H "Authorization: Bearer <YOUR_TOKEN>" http://127.0.0.1:8765/health
 ```
 
 #### 4. Connect to Your Personal AI Assistant (Webhook Bridge)
