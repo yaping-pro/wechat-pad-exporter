@@ -57,13 +57,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
           cache-dependency-path: daemon/go.sum
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Run Daemon Tests
         working-directory: daemon
@@ -134,43 +134,79 @@ jobs:
           body: |
             ## wechat-pad-exporter ${{ github.ref_name }}
 
-            微信数据流导出工具套件，包含 Xposed Hook 模块 (com.wx.sniffer) 与 Go 高性能服务端 Daemon。
+            微信数据流导出工具套件，包含 Xposed Hook 模块 (`com.wx.sniffer`) 与 Go 高性能服务端 Daemon (`wx_daemon`)。
 
-            ### 📦 包含构建产物 (Release Assets)
+            ### 📦 构建产物 (Release Assets)
             - `wechat-pad-exporter-module-${{ github.ref_name }}.apk`: Xposed/LSPosed 数据嗅探模块
             - `wx_daemon-android-arm64`: Android 手机端本地运行的 Daemon 二进制
             - `wx_daemon-linux-amd64`: Linux x86_64 服务器端运行的 Daemon 二进制
 
             ---
 
-            ### 🚀 快速上手与安装说明 (Quick Install Guide)
+            ### 🚀 快速安装与运行说明 (Quick Install Guide)
 
-            #### 1. 安装 Xposed 嗅探模块
+            #### 1. 安装 Xposed 嗅探模块 (Android)
             ```bash
             adb install wechat-pad-exporter-module-${{ github.ref_name }}.apk
             ```
             - 在 LSPosed 管理器中激活模块，勾选作用域为 **微信 (com.tencent.mm)**。
-            - 强制停止微信并重启。
+            - 强制停止微信并重新启动。
 
-            #### 2. 部署并启动 Daemon (手机端运行示例)
-            生成鉴权 Token 并推送到手机：
+            #### 2. 在 Android 手机端部署并运行 Daemon (推荐)
+            守护进程在手机端监听 Unix Domain Socket (`@wechat_stream_ipc`) 接收微信 hook 数据流并落库 SQLite。
+
             ```bash
-            # 生成 32 字节高强度随机 Token
+            # A. 生成高强度鉴权 Token
             TOKEN=$(openssl rand -hex 32)
-            echo "Your daemon token: $TOKEN"
+            echo "Your Bearer Token: $TOKEN"
 
-            # 推送 daemon 至手机并赋予执行权限
+            # B. 在手机上准备配置文件目录与配置
+            adb shell "su -c 'mkdir -p /data/adb/wx_stream && chmod 700 /data/adb/wx_stream'"
+
+            # 创建 config.json 并推送到设备 (参考仓库 daemon/config.example.json)
+            cat <<JSON > /tmp/config.json
+            {
+              "bind": "127.0.0.1",
+              "port": 8765,
+              "uds_path": "@wechat_stream_ipc",
+              "db_path": "/data/adb/wx_stream/vault.db",
+              "token": "$TOKEN",
+              "auth": true,
+              "allow_chats": [],
+              "block_chats": [],
+              "log_file": "/data/adb/wx_stream/daemon.log",
+              "log_max_bytes": 10485760,
+              "log_keep": 3,
+              "retain_days": 90
+            }
+            JSON
+            adb push /tmp/config.json /data/local/tmp/config.json
+            adb shell "su -c 'mv /data/local/tmp/config.json /data/adb/wx_stream/config.json && chmod 600 /data/adb/wx_stream/config.json'"
+
+            # C. 推送 daemon 二进制并赋予执行权限
             adb push wx_daemon-android-arm64 /data/local/tmp/wx_daemon
             adb shell chmod 755 /data/local/tmp/wx_daemon
 
-            # 启动 daemon (可后台运行)
-            adb shell "AUTH_TOKEN=$TOKEN /data/local/tmp/wx_daemon -listen 127.0.0.1:19090 >/data/local/tmp/daemon.log 2>&1 &"
+            # D. 启动 daemon (需 root 权限读取 UDS 与写入 /data/adb/)
+            adb shell "su -c '/data/local/tmp/wx_daemon -config /data/adb/wx_stream/config.json &'"
+
+            # E. 验证健康状态
+            adb forward tcp:8765 tcp:8765
+            curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8765/health
             ```
 
-            #### 3. 部署并启动 Daemon (Linux 服务器端示例)
+            > **开机自启与保活**：推荐使用仓库中的 `deploy/wx_autostart.sh` 与 `deploy/wx_watchdog.sh` 脚本放置于 `/data/adb/service.d/` (Magisk/KernelSU)，以获得开机自启、OOM 保护与进程守护。
+
+            #### 3. 在 Linux 服务器运行 Daemon (存储/分析端)
+            若仅作为独立服务端存储或解析：
             ```bash
             chmod +x wx_daemon-linux-amd64
-            AUTH_TOKEN=$(openssl rand -hex 32) ./wx_daemon-linux-amd64 -listen 0.0.0.0:19090
+            TOKEN=$(openssl rand -hex 32)
+
+            # 命令行直接指定参数启动 (默认监听 127.0.0.1:8765)
+            ./wx_daemon-linux-amd64 -http 127.0.0.1:8765 -db /path/to/vault.db -token "$TOKEN"
+            # 或通过配置文件启动:
+            # ./wx_daemon-linux-amd64 -config /path/to/config.json
             ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
