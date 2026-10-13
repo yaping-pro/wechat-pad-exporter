@@ -3,6 +3,7 @@ name: Build Go Daemon
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
     paths:
       - 'daemon/**'
       - '.github/workflows/build-daemon.yml'
@@ -11,7 +12,7 @@ on:
     paths:
       - 'daemon/**'
       - '.github/workflows/build-daemon.yml'
-
+  workflow_dispatch:
 jobs:
   build:
     name: Cross Compile Daemon
