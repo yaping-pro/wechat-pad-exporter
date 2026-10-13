@@ -1,0 +1,46 @@
+name: 💡 Feature Request / 功能建议
+description: 为 wx-pad-exporter 建议新功能、新下游集成或数据协议扩充 / Propose a new feature or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        欢迎提出功能改进建议！请注意本项目**恪守严格只读 (Strictly Read-Only) 底线**，拒绝任何写操作、自动回复或群控提议。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 背景与痛点 / Problem statement
+      description: 当前遇到了什么不便，或者希望支持什么新的下游消费场景？ / What problem are you trying to solve?
+      placeholder: 例如：希望新增对某种格式富文本媒体消息的特定元数据解析字段...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望方案 / Proposed solution
+      description: 建议如何实现 / Describe the solution you'd like
+      placeholder: 详细描述建议的数据结构、接口变化或实现方式...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案 / Alternatives considered
+      description: 是否考虑过其他替代实现或外部中间件？ / Describe any alternatives you've considered
+    validations:
+      required: false
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 涉及组件 / Scope
+      description: 该功能属于哪一模块 / Which component does this proposal touch?
+      options:
+        - "Android Hook 探针 (android-module / DexKit sniffer)"
+        - "Go 服务端守护进程 (daemon / wx_daemon)"
+        - "Python 消费端与 Webhook (clients / webhook & fetcher)"
+        - "部署守护与开机自启脚本 (deploy / watchdogs)"
+        - "数据契约规范 (schema / JSON Schema)"
+        - "其他 (Other)"
+    validations:
+      required: true

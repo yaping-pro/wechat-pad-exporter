@@ -1,0 +1,74 @@
+name: 🐛 Bug Report / 故障反馈
+description: 提交数据捕获异常、Daemon 崩溃、Webhook 推送失败等问题 / Report a bug in sniffer, daemon, or client
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提交反馈！在提交前请先阅读 [DISCLAIMER.md](https://github.com/yaping-pro/wx-pad-exporter/blob/main/DISCLAIMER.md) 和 [CONTRIBUTING.md](https://github.com/yaping-pro/wx-pad-exporter/blob/main/CONTRIBUTING.md)。
+        **严禁**在日志或示例中粘贴真实聊天内容、密钥 Token、私网真实 IP 或真实微信号！
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述 / What happened
+      description: 清晰扼要地描述遇到的异常行为 / Clear and concise description of the bug
+      placeholder: 例如：Daemon 收到 UDS 消息后未能正确插入 SQLite，返回 500 内部错误...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 / Expected behavior
+      description: 正常情况下应该发生什么 / What should happen under normal conditions
+      placeholder: 例如：UDS 数据实时解析并写入 vault.db，游标 cursor 正常递增。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 触发该问题的具体操作顺序 / Detailed steps to reproduce the behavior
+      value: |
+        1. 启动 wx_daemon 监听: `./wx_daemon -config config.json`
+        2. 发送测试消息或触发微信接收消息
+        3. 查看日志与异常表现：...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境 / Environment
+      description: 请详细提供组件版本与运行平台 / Detailed environment information
+      value: |
+        - 涉及组件 (Component): android-module (sniffer) / daemon (Go) / clients (Python) / deploy
+        - 部署架构 (Topology): Phone-local Daemon / Linux Server Daemon / Split-host
+        - 设备型号与系统 (Device & OS): e.g. Redmi K40 (Android 13) / Ubuntu 24.04 LTS (x86_64)
+        - Root 与 Hook 框架 (Root & Hook Provider): e.g. Magisk 27.0 + LSPosed v1.9.2
+        - 微信版本 (WeChat Version): e.g. 8.0.78
+        - 套件版本 (Suite Version): e.g. v1.0.2 (Commit xxx)
+        - Go / Python 版本 (Runtime): e.g. Go 1.23.2 / Python 3.11.8
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏日志 / Sanitized Logs
+      description: |
+        请提供 Daemon 日志 (`daemon.log`)、客户端输出或 Android Logcat。
+        ⚠️ 提交前请务必使用通配符或脱敏占位符（如 `<TOKEN>`, `127.0.0.1`, `<REDACTED>`）替代私密信息！
+      placeholder: 粘贴脱敏后的代码块...
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 免责与合规确认 / Compliance & Disclaimer Confirmation
+      description: 提交前请仔细确认下列条款 / Please confirm before submitting
+      options:
+        - label: 我已知晓本项目遵循「严格只读 (Strictly Read-Only)」架构，绝不包含主动发消息或群控逻辑。
+          required: true
+        - label: 测试发生在我个人拥有并完全受控的设备与微信账号上，用于个人数据主权与数据备份目的。
+          required: true
+        - label: 我已仔细检查提交的日志、配置与内容，确认已彻底脱敏，不含真实 Token、密钥、微信号或聊天隐私。
+          required: true

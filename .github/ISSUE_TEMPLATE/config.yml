@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 安全漏洞报告 / Security Vulnerability Reporting
+    url: https://github.com/yaping-pro/wx-pad-exporter/security/advisories/new
+    about: 请勿在公开 Issue 中报告敏感凭据泄露或安全漏洞，请使用 GitHub 私密安全通报 (Private Advisory)。/ Report vulnerabilities confidentially.
+  - name: 💬 微信个人助理交流群 / Community Group
+    url: https://github.com/yaping-pro/wx-tablet-mode#--交流群-community
+    about: 加入微信个人助理交流群获取最新动态或交流讨论（群二维码定期维护更新）。/ Join community group.
+  - name: 💬 GitHub Discussions (Q&A / 架构讨论 / 下游接入)
+    url: https://github.com/yaping-pro/wx-pad-exporter/discussions
+    about: 提问、Webhook 对接、Agent 方案答疑请前往 Discussions。/ Ask questions or share agent recipes here.

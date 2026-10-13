@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Maintain Go daemon dependencies
+  - package-ecosystem: "gomod"
+    directory: "/daemon"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # Maintain Android module Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/android-module"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # Maintain GitHub Actions versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
