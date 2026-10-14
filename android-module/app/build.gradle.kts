@@ -72,6 +72,6 @@ android {
 
 dependencies {
     compileOnly(files("libs/api-82.jar"))
-    implementation("org.luckypray:dexkit:2.0.3")
+    implementation("org.luckypray:dexkit:2.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }
