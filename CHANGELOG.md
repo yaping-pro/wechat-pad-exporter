@@ -8,6 +8,11 @@
 ### Added
 - **社区持久备用频道**：在 README 交流群章节与 Issue 模板 `contact_links` 中新增 Telegram 群组 [`t.me/WeChatExporter`](https://t.me/WeChatExporter)，作为微信群二维码过期后的稳定备用交流渠道。
 
+### Changed
+- **Android 模块构建工具链升级（AGP 9.4.1 + Gradle 9.8.1 + 内置 Kotlin）**：升级 Android Gradle Plugin 至 `9.4.1`，Gradle Wrapper 至 `9.8.1`；移除独立的 `org.jetbrains.kotlin.android` 插件，改用 AGP 9 内置 Kotlin 支持，配置迁移为顶层 `kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }`；升级 `kotlinx-coroutines-android` 至 `1.11.0`；清理并收敛所有 Dependabot 依赖 PR。
+
+### Fixed
+- **CI 发布资产命名清洗与 Go 工具链版本解耦**：发布工作流对 `GITHUB_REF_NAME` 资产文件名执行字符清洗，避免非标准引用（如 PR 分支 `4/merge`）破坏文件复制；`build-daemon.yml` 与 `release.yml` 改用 `go-version-file: daemon/go.mod` 统一解析 Go 版本，替代写死的 Go 版本号。
 ## [v1.0.4] - 2026-10-13
 ### Security & Correctness
 - **S-001 (P1, security)**: 抽象 UDS / 文件系统 UDS 连接引入底层 peer UID 校验机制 (`SO_PEERCRED` / `LOCAL_PEERCRED`)。仅允许白名单 UID (root 0 或微信 UID) 接入，拒绝未授权本地对端注入；支持 `-allow-uid` 与 `allowed_peer_uids` 配置。

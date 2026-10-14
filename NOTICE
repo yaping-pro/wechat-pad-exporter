@@ -13,14 +13,14 @@ THIRD-PARTY COMPONENTS AND ATTRIBUTIONS
    - Author: LuckyPray
    - License: GNU Lesser General Public License v3.0 (LGPL-3.0)
    - Usage: Runtime bytecode scanning and method resolution library, dynamically
-     linked via Gradle dependency `org.luckypray:dexkit:2.0.3` in `android-module`.
+     linked via Gradle dependency `org.luckypray:dexkit:2.3.0` in `android-module`.
 
 2. Kotlinx Coroutines (kotlinx-coroutines-android)
    - Upstream: https://github.com/Kotlin/kotlinx.coroutines
    - Author: JetBrains s.r.o.
    - License: Apache License, Version 2.0 (Apache-2.0)
    - Usage: Asynchronous programming and coroutines concurrency runtime,
-     linked via Gradle dependency `org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1` in `android-module`.
+     linked via Gradle dependency `org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0` in `android-module`.
 
 3. Xposed Framework API
    - Upstream: https://github.com/rovo89/XposedBridge
