@@ -96,7 +96,7 @@ jobs:
           echo "Fingerprint assertion PASSED!"
 
       - name: Upload Sniffer APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: com.wx.sniffer-release
           path: release-assets/*.apk
@@ -134,7 +134,7 @@ jobs:
           TAG="${GITHUB_REF_NAME:-v1.0.4}"
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${TAG}" -o ../dist/wx_daemon-linux-amd64 .
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wx_daemon-binaries
           path: dist/*
