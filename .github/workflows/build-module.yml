@@ -64,7 +64,12 @@ jobs:
       - name: Prepare Named Release Assets and Verify Signature
         run: |
           mkdir -p release-assets
-          TAG_NAME="${GITHUB_REF_NAME:-v1.0.3}"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG_NAME="$GITHUB_REF_NAME"
+          else
+            TAG_NAME="${GITHUB_REF_NAME//\//-}"
+          fi
+          TAG_NAME="${TAG_NAME:-v1.0.4}"
           SRC_APK=$(ls android-module/app/build/outputs/apk/release/*.apk | head -n 1)
           if [ -z "$SRC_APK" ] || [ ! -f "$SRC_APK" ]; then
             echo "::error::Release APK not found in android-module/app/build/outputs/apk/release/"
