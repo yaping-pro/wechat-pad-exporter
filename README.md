@@ -310,6 +310,7 @@ echo "微信真实 UID: $DETECTED_UID"
 <!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
 
 > ⚠️ **群二维码时效提示**：微信群二维码具有 7 天有效期限（当前二维码有效期至 **2026-10-20**）。本仓库会定期维护轮换此二维码图片；若您扫码时提示已过期，请查阅仓库最新提交的 [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) 或在 [Issues](https://github.com/yaping-pro/wx-pad-exporter/issues) 中留言反馈。
+> 💡 **长期稳定的备用频道**：微信群二维码 7 天即过期，建议优先使用 Telegram 群组作为持久交流渠道 👉 **[t.me/WeChatExporter](https://t.me/WeChatExporter)**。
 
 ---
 
@@ -604,3 +605,4 @@ Distributed under the [MIT License](LICENSE). Third-party dependencies and notic
 <!-- Maintainer note: rotate assets/wechat-group-qr.png when the group QR expires. -->
 
 > ⚠️ **QR Expiration Notice**: WeChat group invitation QR codes have limited validity (currently **valid until 2026-10-20**). The repository maintainers refresh this asset regularly. If the QR code has expired when you scan it, check the latest committed [`assets/wechat-group-qr.png`](assets/wechat-group-qr.png) on `main` or open an [Issue](https://github.com/yaping-pro/wx-pad-exporter/issues).
+> 💡 **Durable backup channel**: WeChat group QR codes expire every 7 days; we recommend the Telegram group as a persistent channel 👉 **[t.me/WeChatExporter](https://t.me/WeChatExporter)**.

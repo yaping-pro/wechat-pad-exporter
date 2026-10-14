@@ -4,6 +4,9 @@
 本项目遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/) 语义化版本规范，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
 ---
+## [Unreleased]
+### Added
+- **社区持久备用频道**：在 README 交流群章节与 Issue 模板 `contact_links` 中新增 Telegram 群组 [`t.me/WeChatExporter`](https://t.me/WeChatExporter)，作为微信群二维码过期后的稳定备用交流渠道。
 
 ## [v1.0.4] - 2026-10-13
 ### Security & Correctness

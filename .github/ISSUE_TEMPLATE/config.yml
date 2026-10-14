@@ -6,6 +6,9 @@ contact_links:
   - name: 💬 微信个人助理交流群 / Community Group
     url: https://github.com/yaping-pro/wx-tablet-mode#--交流群-community
     about: 加入微信个人助理交流群获取最新动态或交流讨论（群二维码定期维护更新）。/ Join community group.
+  - name: 💬 Telegram 群组（持久备用频道）/ Telegram Group (Durable Backup)
+    url: https://t.me/WeChatExporter
+    about: 微信群二维码过期时的稳定备用交流渠道。/ Persistent fallback when the WeChat QR expires.
   - name: 💬 GitHub Discussions (Q&A / 架构讨论 / 下游接入)
     url: https://github.com/yaping-pro/wx-pad-exporter/discussions
     about: 提问、Webhook 对接、Agent 方案答疑请前往 Discussions。/ Ask questions or share agent recipes here.
